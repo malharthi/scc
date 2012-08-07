@@ -11,16 +11,25 @@
 #include <sstream>
 #include <vector>
 
-#include "code_gen.h"
+// #include "code_gen.h"
 #include "symbol_table.h"
 
+class CodeGenerator;
+
+// Intermediate opcodes. Number of operands and their order explained in the
+// comments in front of each opcode, or on top of each group of them.
 enum IntermediateOp {
+  // Three-parameter instructions
+  // res = operand1 op operand3
   ASSIGN_OP = (int)'=',
   ADD_OP = (int)'+',
   SUBTRACT_OP = (int)'-',
   MULTIPLY_OP = (int)'*',
   DIVIDE_OP = (int)'/',
-  NOT_OP = (int)'!',
+
+  NOT_OP = (int)'!', // res = not operand1
+
+  // Three-parameter
   DIV_REMINDER_OP = (int)'%',
   LESS_THAN_OP = (int)'<',
   GREATER_THAN_OP = (int)'>',
@@ -30,15 +39,18 @@ enum IntermediateOp {
   NOT_EQUAL_OP = 403,
   OR_OP = 404,
   AND_OP = 405,
-  IF_OP,
-  GOTO_OP,
-  LABEL_OP,
-  INC_STACK_PTR_OP,
-  DEC_STACK_PTR_OP,
-  PARAM_OP,
-  ENTER_OP,
-  CALL_OP,
-  RETURN_OP,
+
+  IF_OP,                // if operand1 goto operand2(label)
+  GOTO_OP,              // goto operand1(label)
+  LABEL_OP,             // no operands
+  INC_STACK_PTR_OP,     // inc operand1
+  DEC_STACK_PTR_OP,     // inc operand2
+  PARAM_OP,             // param operand1
+  ENTER_OP,             // param operand2
+  CALL_OP,              // call ret_Op(operand1), operand2(label-dest) i.e.
+                        // ret_op = call label
+  RETURN_OP,            // return operand1(ret value)
+
   PRINT_INT_OP,
   PRINT_STR_OP,
   PRINT_CHAR_OP,
@@ -51,7 +63,7 @@ enum IntermediateOp {
 class Operand {
  public:
   // Return the textual representation of the operand in the assembler language
-  virtual std::string GetAsmOperand(const CodeGenerator& code_gen) = 0;
+  virtual std::string GetAsmOperand(CodeGenerator& code_gen) = 0;
   // Return the textual representation of the operand for our intermediate
   // language.
   virtual std::string GetIntermediateOperand() = 0;
@@ -65,7 +77,7 @@ class BasicOperand : public Operand {
   }
 
   // Overrides the base class
-  virtual std::string GetAsmOperand(const CodeGenerator& code_gen) {
+  virtual std::string GetAsmOperand(CodeGenerator& code_gen) {
     return GetIntermediateOperand();
   }
 
@@ -106,7 +118,7 @@ class VariableOperand : public BasicOperand<std::string> {
   }
 
   // Overrides the base class 
-  virtual std::string GetAsmOperand(const CodeGenerator& code_gen);
+  virtual std::string GetAsmOperand(CodeGenerator& code_gen);
 
  protected:
   SymbolTable* symbol_table_;
@@ -122,7 +134,7 @@ class ArrayOperand : public VariableOperand {
   }
   
   // Overrides the base class
-  virtual std::string GetAsmOperand(const CodeGenerator& code_gen);
+  virtual std::string GetAsmOperand(CodeGenerator& code_gen);
   virtual std::string GetIntermediateOperand();
 
 private:

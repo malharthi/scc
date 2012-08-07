@@ -9,14 +9,13 @@
 Parser::Parser(Lexer* lexer,
                IntermediateInstrsList* interm_list,
                std::vector<Message>* errors_list)
-      : intermediate_code_(interm_list),
-        errors_list_(errors_list),
-        lexer_(lexer),
-        root_symbol_table_(new SymbolTable(NULL)),
-        temp_counter_(0),
-        label_counter_(0),
-        offset_(0)
-{
+  : intermediate_code_(interm_list),
+    errors_list_(errors_list),
+    lexer_(lexer),
+    root_symbol_table_(new SymbolTable(NULL)),
+    temp_counter_(0),
+    label_counter_(0),
+    offset_(0) {
 
   current_scope_table_ = root_symbol_table_;
   RESERVE_KEYWORDS
@@ -42,8 +41,7 @@ void Parser::Error(const std::string& message_str) {
 
 void Parser::Error(TokenCode tok) {
   std::string msg =
-    str_helper::FormatString("'%s' expected.",
-                                             GetTokenString(tok).c_str());
+    str_helper::FormatString("'%s' expected.", GetTokenString(tok).c_str());
   Error(msg);
 }
 
@@ -103,6 +101,12 @@ void Parser::Emit(IntermediateInstr* instr) {
 }
 
 
+void Parser::EmitLabel(LabelOperand* label) {
+  IntermediateInstr* instr = new IntermediateInstr(LABEL_OP, label);
+  Emit(instr);
+}
+
+
 void Parser::EmitLabel(const std::string& label) {
   LabelOperand* label_operand = new LabelOperand(label);
   IntermediateInstr* instr = new IntermediateInstr(LABEL_OP, label_operand);
@@ -111,41 +115,52 @@ void Parser::EmitLabel(const std::string& label) {
 
 
 unsigned int Parser::GetStackSize() {
-  while (offset_ % 4 != 0)
+  while (offset_ % 16 != 0)
       offset_++;
 
   return offset_;
 }
 
 
+LabelOperand* Parser::NewLabel() {
+  std::string label_id = str_helper::FormatString("label_%d", label_counter_++);
+
+  LabelOperand* label_operand = new LabelOperand(label_id);
+  return label_operand;
+}
+
+
 VariableOperand* Parser::NewTemp(DataType type,
                                  bool is_array,
                                  unsigned int elems) {
-  // Create a symbol for the temorary variable since we need it to be insuerted
+  // Create a symbol for the temorary variable since we need it to be inserted
   // into the symbol table for the current scope.
   std::string temp_id = str_helper::FormatString("temp_%d", temp_counter_++);
-  VariableSymbol* temp_symbol;
-  temp_symbol = new VariableSymbol(temp_id);
-  temp_symbol->set_data_type(type);
-  temp_symbol->set_is_array(is_array);
-  temp_symbol->set_kind(LOCAL);
+  // VariableSymbol* temp_symbol;
+  // temp_symbol = new VariableSymbol(temp_id);
+  // temp_symbol->set_data_type(type);
+  // temp_symbol->set_is_array(is_array);
+  // temp_symbol->set_kind(LOCAL);
+  // current_scope_table_->Insert(temp_symbol);
 
-  current_scope_table_->Insert(temp_symbol);
-
+  DeclareVariable(type, temp_id, is_array, elems);
+  
   VariableOperand* temp = new VariableOperand(temp_id, current_scope_table_);
   return temp;
 }
 
 
-void Parser::DeclareVariable(DataType type, std::string var_id, bool is_array, int elems) {
+void Parser::DeclareVariable(DataType type, std::string var_id, bool is_array,
+                             unsigned int elems) {
   if (current_scope_table_->IsInCurrentScope(var_id))
-    Error(str_helper::FormatString("%s is declared in the current scope.", var_id.c_str()));
+    Error(str_helper::FormatString("%s is declared in the current scope.",
+                                   var_id.c_str()));
   else {
     VariableSymbol* symbol = new VariableSymbol(var_id);
 
     symbol->set_offset(offset_);
     // Calculate the size
-    int elem_size = type == CHAR_TYPE ? 1 : 4;
+    unsigned int elem_size = type == CHAR_TYPE ? 1 : 4;
     symbol->set_element_size(elem_size);
     symbol->set_size(elem_size * elems);
     offset_ += symbol->size();
@@ -159,7 +174,7 @@ void Parser::DeclareVariable(DataType type, std::string var_id, bool is_array, i
   }
 }
 
-
+// Generate code for copying a string into a memory buffer
 void Parser::CopyStringToBuffer(const std::string& array_id,
                                 const std::string& text) {
   unsigned int length = text.length();
@@ -174,7 +189,7 @@ void Parser::CopyStringToBuffer(const std::string& array_id,
   }
 }
 
-
+// Start magic!
 void Parser::Parse() {
   current_token_ = lexer_->GetNextToken(*current_scope_table_);
   ParseFunctions();
@@ -224,9 +239,10 @@ void Parser::ParseFunctions() {
         current_token_.code() == CHAR) {
       do {
         // Here are the data type of the parameter in each iteration and a flag
-        // that indicates if the data type token is present. Obviously it is present in
-        // in the first iteration since we checlked in the enclosing 'if', but it is used
-        // in the second iteration after a comma in the parameters list.
+        // that indicates if the data type token is present. Obviously it is
+        // present in the first iteration since we checlked in the enclosing
+        // 'if', but it is used in the second iteration after a comma in the
+        // parameters list.
         DataType param_type;
         bool param_type_found = false;
 
@@ -258,7 +274,8 @@ void Parser::ParseFunctions() {
           }
 
           // Add teh parameter info to the function symbol
-          function_symbol->parameters_.push_back(Parameter(param_type, param_id, is_array));
+          function_symbol->parameters_.push_back(
+                    Parameter(param_type, param_id, is_array));
         } else {
           break;
         }
@@ -277,9 +294,11 @@ void Parser::ParseFunctions() {
     // Emit a label of thsi function
     EmitLabel(function_id);
 
+    unsigned int stack_size = GetStackSize();
+
     // Emit an Enter instruction with the size of the stack of this function
     IntermediateInstr* enter_instr =
-      new IntermediateInstr(ENTER_OP, new NumberOperand(GetStackSize()));
+      new IntermediateInstr(ENTER_OP, new NumberOperand(stack_size));
     Emit(enter_instr);
     
     // Add the function code the program code
@@ -288,6 +307,10 @@ void Parser::ParseFunctions() {
                                function_code->end());
 
     // And finally, the return instrunction at the end of the function
+    // IntermediateInstr* inc_stack_ptr =
+    //   new IntermediateInstr(INC_STACK_PTR_OP, new NumberOperand(stack_size));
+    // Emit(inc_stack_ptr);
+
     IntermediateInstr* ret_instr = new IntermediateInstr(RETURN_OP);
     Emit(ret_instr);
 
@@ -295,7 +318,9 @@ void Parser::ParseFunctions() {
            current_token_.code() == CHAR);
 }
 
-
+// Parses a block and implements scope. If parsing a function the 
+// function symbol should be passed. If just a regular scope or the body 
+// of a conditional statement, pass NULL, whuch is the default value.
 void Parser::ParseBlock(FunctionSymbol* func_symbol) {
   Match(OPEN_BRACE);
 
@@ -306,22 +331,25 @@ void Parser::ParseBlock(FunctionSymbol* func_symbol) {
 
   // If this block is the body of a function, then we need to add information
   // about them in the current symbol table if there are any.
-  std::vector<Parameter>* params_vector = &func_symbol->parameters_;
-  if (params_vector->size() != 0) {
-    unsigned int param_offset = 0;
-    
-    std::vector<Parameter>::iterator it;
-    for (it = params_vector->begin(); it != params_vector->end(); it++) {
-      VariableSymbol* var_symb = new VariableSymbol(it->identifier());
-      var_symb->set_is_array(it->is_array());
-      var_symb->set_data_type(it->type());
-      var_symb->set_element_size(4);
-      var_symb->set_size(4);
-      var_symb->set_offset(param_offset);
-      var_symb->set_kind(ARGUMENT);
-      current_scope_table_->Insert(var_symb);
+  if (func_symbol != NULL) {
+    std::vector<Parameter>* params_vector = &func_symbol->parameters_;
+    if (params_vector->size() != 0) {
+      unsigned int param_offset = 0;
+      
+      std::vector<Parameter>::iterator it;
+      for (it = params_vector->begin(); it != params_vector->end(); it++) {
+        VariableSymbol* var_symb = new VariableSymbol(it->identifier());
+        var_symb->set_is_array(it->is_array());
+        var_symb->set_data_type(it->type());
+        var_symb->set_element_size(4);
+        var_symb->set_size(4);
+        var_symb->set_offset(param_offset);
+        var_symb->set_kind(ARGUMENT);
 
-      param_offset += 4;
+        current_scope_table_->Insert(var_symb);
+
+        param_offset += 4;
+      }
     }
   }
 
@@ -384,7 +412,9 @@ void Parser::ParseDeclarations() {
 void Parser::ParseInitialization(const std::string& var_id) {
   Match(EQUAL);
 
-  VariableSymbol* var_symb = static_cast<VariableSymbol*>((*current_scope_table_)[var_id]);
+  VariableSymbol* var_symb =
+    static_cast<VariableSymbol*>((*current_scope_table_)[var_id]);
+
   if (var_symb->is_array()) {
     if (current_token_.code() == STRING_LITERAL) {
       // Parse array initialization
@@ -417,28 +447,473 @@ void Parser::ParseInitialization(const std::string& var_id) {
   }
 }
 
-
 void Parser::ParseStatements() {
+  // Detecting initial tokens of statements
+  // while (curToken.code == ID || curToken.code == IF ||
+  //       curToken.code == FOR || curToken.code = WHILE ||
+  //       curToken.code == DO || curToken.code == SWITCH ||
+  //       curToken.code == BREAK || curToken.code == CONTINUE ||
+  //       curToken.code == RETURN || curToken.code == OPEN_BRACE ||
+  //       curToken.code == SEMICOLON || curToken.code == PRINT_INT ||
+  //       curToken.code == PRINT_STR || curToken.code == PRINT_CHAR ||
+  //       curToken.code == READ_INT || curToken.code == READ_STR) {
+
+  //   ParseStatement();
+  // }
+
+  // Detecting initial tokens of statements
+  // Contniue parsing statment as long as we
+  // have the initial token if any statement
+  bool keep_going = true;
+
+  while (keep_going) {
+    switch (current_token_.code()) {
+    case ID:        case IF:
+    case FOR:       case WHILE:
+    case DO:        case SWITCH:
+    case BREAK:     case CONTINUE:
+    case RETURN:    case OPEN_BRACE:
+    case SEMICOLON: case PRINT_INT:
+    case PRINT_STR: case PRINT_CHAR:
+    case READ_INT:  case READ_STR:
+      ParseStatement();
+      break;
+    default:
+      keep_going = false;
+      break;
+    }
+  }
+}
+
+// Parse a C statement, one at a time. Statements include:
+// # Assignment (Should be expression statement, but for the sake of simplicity, it is
+//      reduced to a simple assignment statement in the form: var_id = expression).
+// # if, for, while, do, switch, break, continue, and null statements.
+// # Some IO functions expressed as statements of their own.
+void Parser::ParseStatement() {
+  // Each case of this giant switch statement here should have its own scope for
+  // its local variables, thats why there is a block in each case (Without blocks,
+  // code will not compile.)
   switch (current_token_.code()) {
   // Assignment statment or function call
   case ID:
-    std::string id = current_token_.lexeme();
-    Operand* id_operand = ParseId(true);
+    {
+      std::string id = current_token_.lexeme();
+      Operand* id_operand = ParseId(true);
 
-    if (id_operand == NULL)
-      ParseFunctionCall(id);
-    else
-      ParseAssignment(id_operand);
+      if (id_operand == NULL)
+        ParseFunctionCall(id);
+      else
+        ParseAssignment(id_operand);
 
+      Match(SEMICOLON);
+    }
+    break;
+
+  // Parse block statements
+  case OPEN_BRACE:
+    ParseBlock();
+    break;
+
+  // Prasing the if statement
+  case IF:
+    {
+      Match(IF);
+      Match(OPEN_PAREN);
+
+      Operand* if_condition = ParseBool();
+
+      LabelOperand* if_next = NewLabel();
+      LabelOperand* if_false = if_next;
+      LabelOperand* if_true = NewLabel();
+
+      IntermediateInstr* if_inst = new IntermediateInstr(IF_OP, if_condition, if_true);
+      IntermediateInstr* goto_inst = new IntermediateInstr(GOTO_OP, if_false);
+
+      Emit(if_inst);
+      Emit(goto_inst);
+      EmitLabel(if_true);
+
+      Match(CLOSE_PAREN);
+
+      ParseStatement();
+
+      if (current_token_.code() == ELSE) {
+        if_next = NewLabel();
+        Emit(new IntermediateInstr(GOTO_OP, if_next));
+        EmitLabel(if_false);
+
+        Match(ELSE);
+
+        ParseStatement();
+
+        EmitLabel(if_next);
+      } else {
+        EmitLabel(if_next);
+      }
+    }
+    break;
+
+  // Parsing the glorious for statement
+  // Note: C statement lists are not supoorted.
+  // Syntax: for (assignment; bool_expr; assignment) statement
+  case FOR:
+    {
+      Match(FOR);
+      Match(OPEN_PAREN);
+
+      // Parse the 1st assignment statement
+      if (current_token_.code() == ID)
+        ParseAssignment();
+
+      Match(SEMICOLON);
+
+      LabelOperand* for_begin = NewLabel();
+      LabelOperand* for_true = NewLabel();
+      LabelOperand* for_inc = NewLabel();
+      LabelOperand* for_next = NewLabel();
+
+      EmitLabel(for_begin);
+      break_stack_.push(for_next);
+      continue_stack_.push(for_inc);
+
+      // Parse the for condition
+      if (current_token_.code() == NUM_LITERAL || current_token_.code() == ID) {
+        Operand* for_condition = ParseBool();
+        Emit(new IntermediateInstr(IF_OP, for_condition, for_true));
+        Emit(new IntermediateInstr(GOTO_OP, for_next));
+        EmitLabel(for_true);
+      }
+
+      Match(SEMICOLON);
+
+      // The intermidate code of the 3d instruction in a for
+      // loop statement
+      IntermediateInstrsList* assign_inst3;
+
+      // Parse the 3d assignment statement if exists
+      // (Usually an increment or decrement statement)
+      if (current_token_.code() == ID) {
+        // Save the instructions list in a temporary list
+        IntermediateInstrsList* temp = intermediate_code_;
+        // A new list for assignement instructions
+        intermediate_code_ = new IntermediateInstrsList();
+
+        ParseAssignment();
+
+        // Return everything into place
+        assign_inst3 = intermediate_code_;
+        intermediate_code_ = temp;
+      }
+
+      Match(CLOSE_PAREN);
+
+      // Parse the body of the for loop
+      ParseStatement();
+
+      EmitLabel(for_inc);
+
+      // if a third expression exists
+      if (assign_inst3 != NULL) {
+        //instructions.AddRange(assign3Inst);
+        intermediate_code_->insert(intermediate_code_->end(),
+                                   assign_inst3->begin(),
+                                   assign_inst3->end());
+      }
+      Emit(new IntermediateInstr(GOTO_OP, for_begin));
+      EmitLabel(for_next);
+
+      break_stack_.pop();
+      continue_stack_.pop();
+    }
+    break;
+
+  // C while statement
+  case WHILE:
+    {
+      Match(WHILE);
+      Match(OPEN_PAREN);
+
+      LabelOperand* w_begin = NewLabel();
+      LabelOperand* w_true = NewLabel();
+      LabelOperand* w_next = NewLabel();
+
+      break_stack_.push(w_next);
+      continue_stack_.push(w_begin);
+
+      EmitLabel(w_begin);
+      Operand* w_condition = ParseBool();
+
+      Match(CLOSE_PAREN);
+
+      IntermediateInstr* w_inst = new IntermediateInstr(IF_OP, w_condition, w_true);
+      Emit(w_inst);
+      Emit(new IntermediateInstr(GOTO_OP, w_next));
+      EmitLabel(w_true);
+
+      // Parse the body of thw while statement
+      ParseStatement();
+
+      Emit(new IntermediateInstr(GOTO_OP, w_begin));
+      EmitLabel(w_next);
+
+      break_stack_.pop();
+      continue_stack_.pop();
+    }
+    break;
+
+  case DO:
+    {
+      Match(DO);
+
+      LabelOperand* do_begin = NewLabel();
+      LabelOperand* do_condition_label = NewLabel();
+      LabelOperand* do_next = NewLabel();
+
+      break_stack_.push(do_next);
+      continue_stack_.push(do_condition_label);
+
+      EmitLabel(do_begin);
+      ParseBlock();
+
+      Match(WHILE);
+      Match(OPEN_PAREN);
+
+      EmitLabel(do_condition_label);
+
+      Operand* do_condition = ParseBool();
+      IntermediateInstr* do_inst = new IntermediateInstr(IF_OP, do_condition, do_begin);
+      Emit(do_inst);
+      EmitLabel(do_next);
+
+      Match(CLOSE_PAREN);
+      Match(SEMICOLON);
+
+      break_stack_.pop();
+      continue_stack_.pop();
+    }
+    break;
+
+  // Parsing the magnificent C switch statement 
+  case SWITCH:
+    {
+      Match(SWITCH);
+      Match(OPEN_PAREN);
+  
+      LabelOperand* switch_test = NewLabel();
+      LabelOperand* swich_default = NewLabel();
+      LabelOperand* switch_next = NewLabel();
+  
+      break_stack_.push(switch_next);
+  
+      Operand* value;
+      Operand* swCond = ParseBool();
+      Emit(new IntermediateInstr(GOTO_OP, switch_test));
+  
+      Match(CLOSE_PAREN);
+      Match(OPEN_PAREN);
+  
+      std::vector<Operand*> values;
+      std::vector<LabelOperand*> labels;
+  
+      // Indicates whether 'default' label is already parsed
+      bool is_default_parsed = false;
+      // Indicates whether current label is 'default'
+      bool is_default = false;
+  
+      while (current_token_.code() == CASE ||
+             current_token_.code() == DEFAULT) {
+        // Will hold a pointer to this case's value
+        value = NULL;
+  
+        is_default = current_token_.code() == DEFAULT;
+  
+        /* match 'case' or 'default' */
+        Match(current_token_.code());
+  
+        if (is_default) {
+          if (is_default_parsed) {
+            Error("more than one default.");
+          }
+  
+          is_default_parsed = true;
+  
+          Match(COLON);
+          EmitLabel(swich_default);
+  
+          // Parse statements for the current case until the end
+          // (break statemnt is optional)
+          ParseStatements();
+          //Emit(new IntermediateInstr(GOTO_OP, switch_next));
+        } else {
+          value = ParseBool();
+  
+          Match(COLON);
+  
+          LabelOperand* case_label = NewLabel();
+          EmitLabel(case_label);
+  
+          ParseStatements();
+          //Emit(new IntermediateInstr(TokenCode.Goto, switch_next));
+  
+          values.push_back(value);
+          labels.push_back(case_label);
+        }
+      }
+  
+      Match(CLOSE_BRACE);
+  
+      Emit(new IntermediateInstr(GOTO_OP, switch_next));
+      EmitLabel(switch_test);
+  
+      // TODO: Fix this loop to use iterators instead.
+      for (int i = 0; i < labels.size(); i++) {
+        Operand* temp = NewTemp();
+  
+        Emit(new IntermediateInstr(EQUAL_EQUAL_OP, temp, swCond, values[i]));
+        Emit(new IntermediateInstr(IF_OP, temp, labels[i]));
+      }
+  
+      if (is_default_parsed) {
+        Emit(new IntermediateInstr(GOTO_OP, swich_default));
+      }
+  
+      EmitLabel(switch_next);
+  
+      break_stack_.pop();
+    }
+    break;
+
+  // The empty (or null) statement
+  case SEMICOLON:
     Match(SEMICOLON);
+    break;
+
+  case BREAK:
+    {
+      if (!break_stack_.empty()) {
+          LabelOperand* break_target = break_stack_.top();
+          Emit(new IntermediateInstr(GOTO_OP, break_target));
+      } else {
+        Error("'break' statement is not allowed here.");
+      }
+  
+      Match(BREAK);
+      Match(SEMICOLON);
+    }
+    break;
+
+  case CONTINUE:
+    {
+      if (!continue_stack_.empty()) {
+        LabelOperand* continue_target = continue_stack_.top();
+        Emit(new IntermediateInstr(GOTO_OP, continue_target));
+      } else {
+        Error("'continue' statement is not allowed here.");
+      }
+
+      Match(CONTINUE);
+      Match(SEMICOLON);
+    }
+    break;
+
+  case RETURN:
+    {
+      Match(RETURN);
+
+      Operand* return_value = NULL;
+      if (current_function_->return_type() != VOID_TYPE) {
+        return_value = ParseBool();
+      }
+
+      if (current_token_.code() != SEMICOLON)
+        Error("can't return value in a function that returns void.");
+
+      Match(SEMICOLON);
+
+      //Emit(new IntermediateInstr(INC_STACK_PTR_OP, new NumberOperand(GetStackSize())));
+      Emit(new IntermediateInstr(RETURN_OP, return_value));
+    }
+    break;
+
+  case READ_STR:
+    {
+      Match(READ_STR);
+      Match(OPEN_PAREN);
+      Operand* in_buff_id = ParseId(false);
+      Match(COMMA);
+      Operand* in_buff_lim = ParseExpr();
+      Match(CLOSE_PAREN);
+      Match(SEMICOLON);
+      Emit(new IntermediateInstr(READ_STR_OP, in_buff_id, in_buff_lim));
+    }
+    break;
+
+  case READ_INT:
+    {
+      Match(READ_INT);
+      Match(OPEN_PAREN);
+      Operand* var = ParseId(false);
+      Match(CLOSE_PAREN);
+      Match(SEMICOLON);
+      Emit(new IntermediateInstr(READ_INT_OP, var));
+    }
+    break;
+{
+  IntermediateOp print_op;
+
+  case PRINT_CHAR:
+    print_op = PRINT_CHAR_OP;
+    goto PrintIntOrChar;
+
+  case PRINT_INT:
+    print_op = PRINT_INT_OP;
+
+PrintIntOrChar:    
+    Match(current_token_.code());
+    Match(OPEN_PAREN);
+
+    Operand* expression = ParseExpr();
+    Match(CLOSE_PAREN);
+    Match(SEMICOLON);
+    Emit(new IntermediateInstr(print_op, expression));
+    break;
+}
+  case PRINT_STR:
+    {
+      Match(PRINT_STR);
+      Match(OPEN_PAREN);
+
+      if (current_token_.code() == ID) {
+        // Print a string from a pointer or buffer
+        Operand* buffer = ParseId(false);
+        Emit(new IntermediateInstr(PRINT_STR_OP, buffer /*arrOp*/));
+      } else {
+        // Print a string literal (static string)
+        std::string text;
+        if (current_token_.code() == STRING_LITERAL) {
+          text = current_token_.lexeme();
+        }
+        Match(STRING_LITERAL);
+
+        // Create a temporary buffer for the string we have
+        VariableOperand* temp_buffer = NewTemp(CHAR_TYPE, true, text.length() + 1);
+        CopyStringToBuffer(temp_buffer->GetSymbol()->lexeme(), text);
+        Emit(new IntermediateInstr(PRINT_STR_OP, temp_buffer));
+      }
+
+      Match(CLOSE_PAREN);
+      Match(SEMICOLON);
+    }
     break;
   }
 }
 
 
 void Parser::ParseAssignment(Operand* lhs_operand) {
-  if (lhs_operand == NULL)
+  if (lhs_operand == NULL) {
     lhs_operand = ParseId(false);
+  }
 
   TokenCode token = current_token_.code();
   if (token == PLUS_PLUS || token == MINUS_MINUS) {
@@ -455,7 +930,8 @@ void Parser::ParseAssignment(Operand* lhs_operand) {
     /* var = expression */
     Match(EQUAL);
 
-    IntermediateInstr* assign_inst = new IntermediateInstr(ASSIGN_OP, lhs_operand, ParseBool());
+    IntermediateInstr* assign_inst =
+      new IntermediateInstr(ASSIGN_OP, lhs_operand, ParseBool());
     Emit(assign_inst);
   }
 }
@@ -494,7 +970,8 @@ Operand* Parser::ParseAnd() {
     Match(AND);
 
     t = NewTemp();
-    IntermediateInstr* inst = new IntermediateInstr(AND_OP, t, operand1, ParseEquality());
+    IntermediateInstr* inst = new IntermediateInstr(AND_OP, t, operand1,
+                                                    ParseEquality());
     Emit(inst);
     operand1 = t;
   }
@@ -507,7 +984,8 @@ Operand* Parser::ParseEquality() {
   Operand* t;
   Operand* operand1 = ParseRel();
 
-  while (current_token_.code() == EQUAL_EQUAL || current_token_.code() == NOT_EQUAL) {
+  while (current_token_.code() == EQUAL_EQUAL ||
+         current_token_.code() == NOT_EQUAL) {
     // The internal number of '==' and '!=' both as Token Codes ot Intermediate
     // operation are the same. So we just cast one to the other in order to get the
     // intermediate op from the token code.
@@ -528,7 +1006,8 @@ Operand* Parser::ParseRel() {
   Operand* operand1 = ParseExpr();
 
   while (current_token_.code() == LESS || current_token_.code() == LESS_OR_EQUAL ||
-         current_token_.code() == GREATER || current_token_.code() == GREATER_OR_EQUAL) {
+         current_token_.code() == GREATER ||
+         current_token_.code() == GREATER_OR_EQUAL) {
     // Same values, so we just cast one to the other
     IntermediateOp op = static_cast<IntermediateOp>(current_token_.code());
     Match(current_token_.code());
@@ -612,9 +1091,10 @@ Operand* Parser::ParseFactor() {
     break;
 
   case ID:
-    // Here we encounter an identifier in the expression. It could be either a variable
-    // identifier or a function's. We try parsing as a variable id first. If we don't
-    // succeed we parse as function call.
+    // Here we encounter an identifier in the expression.
+    // It could be an identifier either for a variable or a function
+    // We try parsing as a variable id first, If we don't
+    // succeed we parse as a function call.
     id = current_token_.lexeme();
     ret = ParseId(true);
     if (ret == NULL)
@@ -648,18 +1128,23 @@ Operand* Parser::ParseId(bool allow_func) {
   // Test whether the identifer belongs to an array and parse the brackets
   // and teh index expression.
   if (current_token_.code() == OPEN_BRACKET) {
+
     VariableSymbol* var_symbol = static_cast<VariableSymbol*>(symbol);
-    if (!var_symbol->is_array())
+    if (!var_symbol->is_array()) {
       Error(var_id + " is not an array.");
+    }
 
     Match(OPEN_BRACKET);
-    Operand* array_operand = new ArrayOperand(var_id, ParseExpr(), current_scope_table_);
+    Operand* array_operand = new ArrayOperand(var_id, ParseExpr(),
+                                              current_scope_table_);
     Match(CLOSE_BRACKET);
 
     return array_operand;
-  } else if ((current_token_.code() == OPEN_PAREN) && (allow_func))
+
+  } else if ((current_token_.code() == OPEN_PAREN) && (allow_func)) {
     return NULL;
-  else {
+
+  } else {
     VariableSymbol* var_symbol = dynamic_cast<VariableSymbol*>(symbol);
     if (var_symbol == NULL)
       Error(var_id + " is not a variable.");
@@ -713,9 +1198,11 @@ Operand* Parser::ParseFunctionCall(const std::string& func_id) {
   // Emit an instruction that perform the calling
   Emit(new IntermediateInstr(CALL_OP, ret_operand, new FunctionOperand(func_id)));
 
+  // Restore the space allocaed for pushed arguements in the stack. i.e., pop them
   // Emit an instruction that increases the stack pointer to the size of arguments
   // multiplyed by 4 since the size of each argument is 4 bytes.
-  Emit(new IntermediateInstr(INC_STACK_PTR_OP, new NumberOperand(arguments_count * 4)));
+  Emit(new IntermediateInstr(INC_STACK_PTR_OP,
+                             new NumberOperand(arguments_count * 4)));
 
   delete arguments;
 

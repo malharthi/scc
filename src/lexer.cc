@@ -11,8 +11,9 @@
 #include "lexer.h"
 
 Lexer::Lexer(const std::string& file_name, std::vector<Message>* errors)
-    : lexical_errors_(errors),
-      current_location_(SourceLocation(file_name, 1)) {
+  : lexical_errors_(errors),
+    current_location_(SourceLocation(file_name, 1)) {
+      
   input_stream_.open(file_name.c_str());
   //ReadChar();
 }
@@ -88,7 +89,7 @@ start:
   lex_buffer = "";
   //readChar();
 
-  // Skipping whitespaces
+  // Skipping white spaces
   while (isspace(PeekChar()))
     ReadChar();
 

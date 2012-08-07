@@ -1,23 +1,28 @@
 // SCC testing
 
 
-int foo(int x) {
-
+void ln() {
+	printChar('\n');
 }
 
 int sum(int p1, int p2) {
-	int g=5;
-	int x, y =7+g*foo(5);
-
-	x=y;
+	return p1+p2;
 }
 
 void main()
 {
-	char c[100] = "Hello, World!";
-	int w=10;
-	int x=c[0]+10;
+	int age;
+	char name[20];
+
+	printStr("name? ");
+	readStr(name, 20);
+
+	printStr("age? ");
+	readInt(age);
+
+	printStr("Welcome, ");
+	printStr(name); printStr(", ");
+	printInt(age); printStr(" :-)"); ln();
 }
 
-int if) {}
 

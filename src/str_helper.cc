@@ -5,6 +5,8 @@
 // the LICENSE.txt file.
 
 #include <cstdarg>
+#include <cstring>
+#include <cstdio>
 
 #include "str_helper.h"
 

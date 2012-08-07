@@ -46,7 +46,6 @@ class Parser {
   Parser(Lexer* lexer, IntermediateInstrsList* interm_list, std::vector<Message>* errors_list);
   ~Parser();
 
-  // Parsing functions
   void Parse();
 
  private:
@@ -70,22 +69,27 @@ class Parser {
   void Emit(IntermediateInstr* instr);
   // Emits a label into the instructions code list
   void EmitLabel(const std::string& label);
+  void EmitLabel(LabelOperand* label);
 
   unsigned int GetStackSize();
 
+  LabelOperand* NewLabel();
   VariableOperand* NewTemp(DataType type = INT_TYPE,
                            bool is_array = false,
                            unsigned int elems = 1);
 
-  void DeclareVariable(DataType type, std::string var_id, bool is_array, int elems);
+  void DeclareVariable(DataType type, std::string var_id, bool is_array, unsigned int elems);
   void CopyStringToBuffer(const std::string& array_id, const std::string& text);
   
+  // Parsing functions
+
   void ParseFunctions();
-  void ParseBlock(FunctionSymbol* func_symbol);
+  void ParseBlock(FunctionSymbol* func_symbol = NULL);
   void ParseDeclarations();
   void ParseInitialization(const std::string& var_id);
   void ParseStatements();
-  void ParseAssignment(Operand* lhs_operand);
+  void ParseStatement();
+  void ParseAssignment(Operand* lhs_operand = NULL);
 
   Operand* ParseBool();
   Operand* ParseAnd();
@@ -97,7 +101,8 @@ class Parser {
   Operand* ParseId(bool allow_func);
   Operand* ParseFunctionCall(const std::string& func_id);
   std::vector<Operand*>* ParseArgumentsList();
-private:
+
+ private:
   // Private members
   unsigned int temp_counter_;
   unsigned int offset_;

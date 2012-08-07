@@ -1,1 +1,9 @@
 .DS_Store
+.DS_Store?
+
+*.exe
+*.o
+*.so
+
+./build/scc
+./build/scc.dSYM

@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdio>
 
 #if defined __GNUC__ || defined __APPLE__
 #include <ext/hash_map>
@@ -22,6 +23,17 @@ using namespace __gnu_cxx;
 #include "str_helper.h"
 
 // Token codes, each token is identified by an integer.
+
+// Token names chosen in this enum are the names of the plain symbols
+// which have no relation with the meaning of the symbol in the context of the
+// programming lanauge. At the level of lexical analysis, symbols
+// are independent from their meaning, and the semantic analysis has yet to
+// figure out the meaning of the symbols. For instance, the symbol '*' is called
+// 'ASTERISK' or possibly a 'STAR'. It can refer to different language elements,
+// such as a pointer, or a muliplication sign, so in the enum we call just a an
+// asterisk or a star, until the parser or the semantic analyer figures out the
+// meaning from the context.
+
 enum TokenCode {
   END_OF_FILE = EOF,
   PLUS = (int)'+',
@@ -238,13 +250,13 @@ class VariableSymbol : public Symbol {
   }
 
   // Mutators
-  void set_offset(int value) {
+  void set_offset(unsigned int value) {
     offset_ = value;  
   }
-  void set_element_size(int value) {
+  void set_element_size(unsigned int value) {
    element_size_ = value;
   }
-  void set_size(int value) {
+  void set_size(unsigned int value) {
    size_ = value;
   }
   void set_is_array(bool value) {
@@ -344,7 +356,7 @@ class SymbolTable {
   //const Symbol* Lookup(const std::string& lexeme) const;
 
   // Return true if the given lexeme corresponds to a symbol in the
-  // current symbol table ie. the current scope.
+  // current symbol table i.e., the current scope.
   bool IsInCurrentScope(const std::string& lexeme) const;
 
   // A replacement for the outdated Lookup function.

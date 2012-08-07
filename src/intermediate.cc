@@ -9,32 +9,35 @@
 #include "str_helper.h"
 #include "intermediate.h"
 
+#include "code_gen.h";
+
 // VariableOperand class implementation
 
-std::string VariableOperand::GetAsmOperand(const CodeGenerator& code_gen) {
+std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
   const VariableSymbol* variable_symbol = GetSymbol();
 
   operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
   if (variable_symbol->kind() == LOCAL)
-    operand_stream << "ptr [ebp - "
+    operand_stream << "[ebp - " // "ptr [ebp - " 
                    << (variable_symbol->offset() + variable_symbol->size())
                    << "]";
   else
-    operand_stream << "ptr [ebp - " << (variable_symbol->offset() + 8) << "]";
-
+    operand_stream << "[ebp + " << (variable_symbol->offset() + 8) << "]";
+    // "ptr [ebp - "
   return operand_stream.str();
 }
 
 // ArrayOperand class inplementation
 
-std::string ArrayOperand::GetAsmOperand(const CodeGenerator& code_gen) {
+std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
   const VariableSymbol* array_symbol = GetSymbol();
 
-  //code_gen.LoadOperandToReg("esi", index_operand_);
-  operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ")
-                 << "ptr [ebp + esi * "
+  code_gen.LoadOperandToReg("esi", index_operand_);
+  operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
+  operand_stream << "[ebp + esi * "
+                  // "ptr [ebp + esi * "
                  << array_symbol->element_size()
                  << " - " << (array_symbol->offset() + array_symbol->size())
                  << "]";
