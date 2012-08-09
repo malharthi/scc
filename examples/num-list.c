@@ -1,4 +1,6 @@
 
+// A prorgam that parses a string contains numbers seperated
+// by spaces.
 void main()
 {
 	int i, j=0, value=0, str_len, sum=0;

@@ -1,6 +1,5 @@
 // fib algorithm
 int fib(int i) {
-  printStr("fib\n");
   if (i == 1) {
     return 1;
   } else {
@@ -11,7 +10,6 @@ int fib(int i) {
     }
   }
 }
-// fib algorithm
 int read() {
   int ret;
   readInt(ret);

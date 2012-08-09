@@ -1,7 +1,7 @@
 
-/* test program*/
+// A program that lists even numbers between two numbers
 
-void _main()
+void main()
 {	
 	int i, start, end;
 	
@@ -18,5 +18,4 @@ void _main()
 		printInt(i);
 		printChar(' ');
 	}
-	
 }

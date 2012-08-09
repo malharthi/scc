@@ -28,7 +28,7 @@ std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
   return operand_stream.str();
 }
 
-// ArrayOperand class inplementation
+// ArrayOperand class implementation
 
 std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
@@ -52,7 +52,7 @@ std::string ArrayOperand::GetIntermediateOperand() {
 }
 
 
-// IntermediateInstr class implemetation
+// IntermediateInstr class implementation
 
 std::string IntermediateInstr::GetAsString() { 
   switch (operation_) {

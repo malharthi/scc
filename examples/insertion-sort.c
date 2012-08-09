@@ -25,8 +25,9 @@ void main()
 	}
 	
 	// print hte array
-	printStr("\n\n After sorting:\n");
+	printStr("After sorting:\n");
 	for (i = 0; i < n; i++) {
 		printInt(array[i]); printChar(' ');
 	}
+	printChar('\n');
 }

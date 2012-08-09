@@ -238,7 +238,7 @@ void Parser::ParseFunctions() {
     if (current_token_.code() == VOID || current_token_.code() == INT ||
         current_token_.code() == CHAR) {
       do {
-        // Here are the data type of the parameter in each iteration and a flag
+        // Here is the data type of the parameter in each iteration and a flag
         // that indicates if the data type token is present. Obviously it is
         // present in the first iteration since we checlked in the enclosing
         // 'if', but it is used in the second iteration after a comma in the
@@ -273,7 +273,7 @@ void Parser::ParseFunctions() {
             Match(CLOSE_BRACKET);
           }
 
-          // Add teh parameter info to the function symbol
+          // Add the parameter info to the function symbol
           function_symbol->parameters_.push_back(
                     Parameter(param_type, param_id, is_array));
         } else {
@@ -291,7 +291,7 @@ void Parser::ParseFunctions() {
     // Restore the pointer to the original interediate instructions list
     intermediate_code_ = original_code;
 
-    // Emit a label of thsi function
+    // Emit a label of this function
     EmitLabel(function_id);
 
     unsigned int stack_size = GetStackSize();
@@ -1126,7 +1126,7 @@ Operand* Parser::ParseId(bool allow_func) {
   Match(ID);
 
   // Test whether the identifer belongs to an array and parse the brackets
-  // and teh index expression.
+  // and the index expression.
   if (current_token_.code() == OPEN_BRACKET) {
 
     VariableSymbol* var_symbol = static_cast<VariableSymbol*>(symbol);

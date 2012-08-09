@@ -8,10 +8,12 @@
 
 #include "code_gen.h"
 
+// Emiting an intermediate instruction as a comment before the its translation
+// to assembler code.
 void CodeGenerator::EmitComment(std::string comment) {
   //assembler_code.push_back(str_helper::FormatString("\t%s", comment.c_str()));
   
-  // Remove the tab character at the beggingin of the intermediate instruction
+  // Remove the tab character at the begining of the intermediate instruction
   comment.erase(0, 1);
   // Remove the new line character at the end of the intermediate instruction
   comment.erase(comment.length() - 1, 1);
@@ -101,7 +103,8 @@ void CodeGenerator::StoreRegToAddress(Operand* operand,
   EmitInstruction("mov", operand->GetAsmOperand(*this), src_register);
 }
 
-// This is actually a trick helper function
+// This function does a dirty trick, which is removing the 'dword' or 'byte'
+// keywords from the assembler operands returned from GetAsmOperand.
 void CodeGenerator::LoadEffectiveAddress(const std::string& reg, Operand* operand) {
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   std::string asm_operand = var_op->GetAsmOperand(*this);
@@ -121,8 +124,8 @@ void CodeGenerator::GenerateCode() {
   EmitDirective("extern printf, scanf, gets");
 
   EmitDirective("segment .data");
-  EmitDirective("__print_read_Int_format: db \"%d\",0");
-  EmitDirective("__printChar_format: db \"%c\",0");
+  EmitDirective("__print_read_Int_format: db \"%d\",0,0");
+  EmitDirective("__printChar_format: db \"%c\",0,0");
   //EmitDirective("__read_Str_format: db \"%s\",0");
   
   EmitDirective("segment .text");

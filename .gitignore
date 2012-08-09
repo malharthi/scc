@@ -1,9 +1,5 @@
 .DS_Store
-.DS_Store?
 
-*.exe
-*.o
-*.so
-
-./build/scc
-./build/scc.dSYM
+tests/*.o
+tests/*.s
+tests/*.intermediate

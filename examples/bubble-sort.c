@@ -9,7 +9,7 @@ void main()
 	printStr("Bubble Sort Algorithm\n");
 	
 	// print the array
-	printStr("\n Before sorting:\n");
+	printStr("Before sorting:\n");
 	for (i=0; i < lim; i++) {
 		printInt(array[i]); printChar(' ');
 	}
@@ -25,7 +25,7 @@ void main()
 	}
 	
 	// print hte array
-	printStr("\n\n After sorting:\n");
+	printStr("After sorting:\n");
 	for (i=0; i < lim; i++) {
 		printInt(array[i]); printChar(' ');
 	}
