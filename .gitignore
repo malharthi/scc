@@ -1,5 +1,5 @@
 .DS_Store
 
-tests/*.o
-tests/*.s
-tests/*.intermediate
+examples/*.o
+examples/*.s
+examples/*.intermediate
