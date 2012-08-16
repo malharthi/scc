@@ -15,16 +15,36 @@
 
 std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
+  std::stringstream op1;
+
   const VariableSymbol* variable_symbol = GetSymbol();
 
   operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
-  if (variable_symbol->kind() == LOCAL)
-    operand_stream << "[ebp - " // "ptr [ebp - " 
-                   << (variable_symbol->offset() + variable_symbol->size())
-                   << "]";
-  else
-    operand_stream << "[ebp + " << (variable_symbol->offset() + 8) << "]";
+  // Regular local variable (Just return the value)
+  if (variable_symbol->kind() == LOCAL) {
+    op1 << "[ebp - " // "ptr [ebp - " 
+        << (variable_symbol->offset() + variable_symbol->size())
+        << "]";
+    
+    if (variable_symbol->is_array()) {
+      code_gen.EmitInstruction("lea", "ebx", op1.str());
+      operand_stream << "ebx";
+    } else {
+      operand_stream << op1.str();
+    }
+  } else {
+    // symbol kind == ARGUMENT
+    // Variable past as an argument (Just access the value)
+    
+    op1 << "[ebp + " << (variable_symbol->offset() + 8) << "]";
     // "ptr [ebp - "
+    // if (variable_symbol->is_array()) {
+    //   code_gen.EmitInstruction("lea", "ebx", op1.str());
+    //   operand_stream << "ebx";
+    // } else {
+      operand_stream << op1.str();
+    //}
+  }
   return operand_stream.str();
 }
 
@@ -34,13 +54,31 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
   const VariableSymbol* array_symbol = GetSymbol();
 
-  code_gen.LoadOperandToReg("esi", index_operand_);
-  operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
-  operand_stream << "[ebp + esi * "
-                  // "ptr [ebp + esi * "
-                 << array_symbol->element_size()
-                 << " - " << (array_symbol->offset() + array_symbol->size())
-                 << "]";
+  if (array_symbol->kind() == LOCAL) {
+    // Regular static array created locally (Access the calue of the element)
+    code_gen.LoadOperandToReg("esi", index_operand_);
+    operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
+    operand_stream << "[ebp + esi * "
+                    // "ptr [ebp + esi * "
+                   << array_symbol->element_size()
+                   << " - " << (array_symbol->offset() + array_symbol->size())
+                   << "]";
+  } else {
+    // symbol kind = ARGUMENT
+    // Array passed as an argument, so we have a pointer
+    // Load the address (which is the value passed) to ebx as the base address, then
+    // access the value at the required index in esi
+    code_gen.EmitInstruction("mov", "ebx", VariableOperand::GetAsmOperand(code_gen));
+    //VariableOperand::GetAsmOperand(code_gen);
+
+    code_gen.LoadOperandToReg("esi", index_operand_);
+    operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
+    operand_stream << "[ebx + esi * "
+                    // "ptr [ebp + esi * "
+                   << array_symbol->element_size()
+                   //<< " - " << (array_symbol->offset() + array_symbol->size())
+                   << "]";
+  }
 
   return operand_stream.str();
 }

@@ -352,7 +352,7 @@ void Parser::ParseBlock(FunctionSymbol* func_symbol) {
         VariableSymbol* var_symb = new VariableSymbol(it->identifier());
         var_symb->set_is_array(it->is_array());
         var_symb->set_data_type(it->type());
-        var_symb->set_element_size(4);
+        var_symb->set_element_size(it->type() == CHAR_TYPE? 1 : 4);
         var_symb->set_size(4);
         var_symb->set_offset(param_offset);
         var_symb->set_kind(ARGUMENT);
