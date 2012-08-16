@@ -161,9 +161,15 @@ void Parser::DeclareVariable(DataType type, std::string var_id, bool is_array,
     symbol->set_offset(offset_);
     // Calculate the size
     unsigned int elem_size = type == CHAR_TYPE ? 1 : 4;
+    unsigned int size = elem_size * elems;
+    
+    unsigned int size_aligned = size;
+    while (size_aligned % 4 != 0)
+      size_aligned++;
+
     symbol->set_element_size(elem_size);
-    symbol->set_size(elem_size * elems);
-    offset_ += symbol->size();
+    symbol->set_size(size);
+    offset_ += size_aligned;
 
     symbol->set_data_type(type);
     //symbol.isTemp = false;
@@ -293,6 +299,11 @@ void Parser::ParseFunctions() {
 
     // Emit a label of this function
     EmitLabel(function_id);
+#if defined __APPLE__
+    if (function_id == "main") {
+      EmitLabel("_main");
+    }
+#endif
 
     unsigned int stack_size = GetStackSize();
 

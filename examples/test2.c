@@ -24,5 +24,3 @@ void main()
 	printStr(name); printStr(", ");
 	printInt(age); printStr(" :-)"); ln();
 }
-
-

@@ -17,7 +17,7 @@ void main()
 	for (i=0; i<str_len; i++)
 	{
 		if (buffer[i] == ',' || buffer[i] == ' ')
-			continue;
+			continue; 
 			
 		if (!(buffer[i] >= '0' && buffer[i] <= '9'))
 		{

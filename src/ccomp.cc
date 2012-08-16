@@ -71,9 +71,18 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
     // The assembler command for nasm in Linux (ELF 32 bit)
     // For OS X, change output format to macho (32 bit)
     // For debug information, use -g
+#if defined __APPLE__
+    std::string assembler_cmd = str_helper::FormatString("nasm -f macho -o %s.o %s",
+                                                      output_file_name_no_ext.c_str(),
+                                                      output_file_name_assembler.c_str());
+
+#else
+    // Linux
     std::string assembler_cmd = str_helper::FormatString("nasm -f elf -o %s.o %s",
                                                       output_file_name_no_ext.c_str(),
                                                       output_file_name_assembler.c_str());
+#endif
+    
     std::string linker_cmd = str_helper::FormatString("gcc -m32 -o %s %s.o",
                                                       output_file_name_no_ext.c_str(),
                                                       output_file_name_no_ext.c_str());

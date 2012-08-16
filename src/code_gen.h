@@ -41,6 +41,7 @@ class CodeGenerator {
   
  private:
   void WriteAssmblerCodeToStream();
+
  private:
   std::ostream& output_stream_;
   IntermediateInstrsList* intermediate_code;

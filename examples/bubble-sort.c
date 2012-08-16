@@ -13,6 +13,7 @@ void main()
 	for (i=0; i < lim; i++) {
 		printInt(array[i]); printChar(' ');
 	}
+	printChar('\n');
 	
 	for (i = 0; i < lim; i++) {
 		for (k = 0; k < lim - i - 1; k++) {
