@@ -7,11 +7,11 @@
 	Simple C-Subset Compiler is my graduation project in for my bachelor
 	degree. It translates source programs written in a subset of the C
 	language into Intel i386 assembly language, which will be then passed to
-	an assembler to generate executable files.
+	an assembler to generate executable files automatically.
 
 	The subset is simple, there are no pointers or structures for example. The
 	compiler only supports the basic C statements, two data types including
-	basic implementation for arrays and strings, in addition to functions.
+	basic implementation of arrays and strings, in addition to functions.
 	There are also several built-in functions for basic IO within the system
 	terminal.
 
@@ -28,7 +28,7 @@
 
 2. STEPS FOR COMPILING AND RUNNING SCC
 
-	Currently SCC generates code that works on Linux, so there are the steps
+	Currently SCC generates code that works on Linux, so these are the steps
 	to compile and run SCC on Linux: (It was tested on Ubuntu Linux)
 
 	- Download the source code (no binaries are provided).
@@ -70,8 +70,7 @@
 	 	- fact-rec: the executable file
 	 	- You will see a fourth file, fact-rec.o, which is the object code
 	 	  before linking. You can delete this one.
-	 - The directory scc/tests/ contains some code examples to see what
-	   SCC is able to compile.
+	 - The directory scc/examples/ contains some code examples to test with SCC.
 
 
 3. IMPLEMENTATION
@@ -85,7 +84,7 @@
 	aligned in a specific way in order to be able to call functions from
 	dynamically linked libraries, such as glibc, which we are using.
 
-	Both scanner and parser are hand-written (no lexer, parser generators are
+	Both scanner and parser are hand-written (no lexer orparser generators are
 	used). The parser is a recursive-descent parser. However most of the
 	recursions were optimized for speed and converted into loops as it was
 	possible.
@@ -100,7 +99,7 @@
 	The resulting assembly code is assembled using the nasm assembler and 
 	linked using the linker included with the GCC tool-chain. Both are
 	required to compile the source code automatically. The final executable
-	file is linked to glibc. 
+	file is dynamically linked to glibc and crt (The C runtime library). 
 
 3.1 NOTE
 
@@ -108,7 +107,7 @@
 	the compilation process itself or in the generated intermediate or 
 	assembler code. I do not plan on fixing or developing this thing; however,
 	you are welcome to inform me about anything you find. You can send me
-	patches if you want. I can be reached via (mohannad.harthi (at) gmail.com)
+	patches if you want. I can be reached at (mohannad.harthi (at) gmail.com)
 
 
 4. THE C SUBSET (OR THE C-LIKE LANGUAGE)
@@ -124,12 +123,14 @@
 	
 	Static arrays are only supported.
 
-	Arrays are not implemented as pointers, if you pass an array to a
-	function the first element will be passed instead, which obviously is not
-	the correct behavior. There are no plans to fix that at the time being.
+	The implementation of arrays is simplistic. You cannot pass arrays around or
+	do any kind of pointer arithmetic. If you pass an array to a function the
+	first element will be passed instead, which obviously is not the correct
+	behavior. Currently there are no plans to fix that.
 
-	Local variables in each scope should be declared at the beginning of the
-	the scope block before any other statements, just like the good old C89.
+	Additionally, local variables in each scope should be declared at the
+	beginning of the the scope block before any other statements, just like the
+	good old C89.
 
 4.2 LITERALS
 	
@@ -166,35 +167,46 @@
 	- readStr(char buffer[], int bufferSize);
 	- readInt(int n)
 	
-	Note: Theses functions are translated to calls to the standard C IO
+	Note: Theses functions are translated into calls to the standard C IO
 	functions, such as printf and scanf. Also, these functions are treated as
 	keywords and thus are part of the language syntax.  
 
 	Yo can define your own functions, of course, otherwise this compiler would
-	be boring! However,  it is important to know that you cannot pass arrays,
+	be so boring! However, it is important to know that you cannot pass arrays,
 	and you cannot write forward declarations for functions this way:
 
 	int f(int x);
 
 	So you should be careful about the order in which you define your
-	functions. You will run to awkward situations when you have too many
+	functions. You will run into awkward situations when you have too many
 	functions that call each other.
 
 	Additionally, scope is implemented properly (I hope). However, there is no
 	public scope (global variables), but the good news is, inside functions,
-	you can have nested scopes as many as you want. For example:
+	you can have nested scopes as many as you want. So visibility, scope, and
+	life time of a local variables are supposed to work the same way as a
+	real-word C compiler, unless there is something I do not know about. For
+	example:
 
 	void foo()
 	{
+		int x, y;
+		// Nested block
 		{
-			if (true) {}
+			int x; // Different x
+
+			if (true)
+			{
+				int x; // Another x in the if's block
+
+			}
 		}
 	}
 
 	There are many limitations in the language, for example there are no type
-	checking, and arrays cannot be passed between functions and so on. The
-	goal was not creating a language, but a small experiment in compiler
-	writing.
+	checking, and arrays cannot be passed between functions and so on. So please
+	understand that the goal was not creating a language, but a small experiment
+	in compiler construction.
 
 	Have fun!
 
