@@ -1,3 +1,9 @@
+void str_arr(char str[], int len) {
+	int i;
+	for (i=0; i<len; i++) {
+		printChar(str[i]); printChar(' ');
+	}
+}
 void inc_arr(int arr[], int len) {
 	int i;
 	for (i=0; i<len; i++) {
