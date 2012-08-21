@@ -68,11 +68,8 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
     // Array passed as an argument, so we have a pointer
     // Load the address (which is the value passed) to ebx as the base address, then
     // access the value at the required index in esi
-    //std::string asm_operand = VariableOperand::GetAsmOperand(code_gen);
-    //std::string clean_operand = code_gen.RemoveSizeSpecifier(array_symbol, asm_operand);
-    code_gen.EmitInstruction("mov", "ebx", VariableOperand::GetAsmOperand(code_gen));
-    //code_gen.LoadEffectiveAddress("ebx", VariableOperand::GetAsmOperand(code_gen));
-    //VariableOperand::GetAsmOperand(code_gen);
+    std::string mov_instr = array_symbol->data_type() == CHAR_TYPE? "movsx" : "mov";
+    code_gen.EmitInstruction(mov_instr, "ebx", VariableOperand::GetAsmOperand(code_gen));
 
     code_gen.LoadOperandToReg("esi", index_operand_);
     operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
