@@ -90,11 +90,11 @@ void CodeGenerator::LoadOperandToReg(const std::string& reg,
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
     const VariableSymbol* symbol = var_op->GetSymbol();
-     ArrayOperand* array_op = dynamic_cast< ArrayOperand*>(var_op);
-    if ((array_op == NULL) && (symbol->is_array())) {
-      LoadEffectiveAddress(reg, operand);
-      return;
-    }
+    // ArrayOperand* array_op = dynamic_cast< ArrayOperand*>(var_op);
+    // if ((array_op == NULL) && (symbol->is_array())) {
+    //   LoadEffectiveAddress(reg, operand);
+    //   return;
+    // }
 
     if (symbol->data_type() == CHAR_TYPE) {
       move_instr = "movsx";
@@ -401,7 +401,13 @@ void CodeGenerator::GenerateCode() {
         VariableOperand* var_op =
           dynamic_cast<VariableOperand*>(interm_instr->operand1());
         if ((var_op != NULL) /*&& (var_op->GetSymbol()->data_type() == CHAR_TYPE)*/) {
-          LoadOperandToReg("eax", var_op);
+          const VariableSymbol* symbol = var_op->GetSymbol();
+          
+          if (symbol->is_array() && symbol->kind() == LOCAL) {
+            LoadEffectiveAddress("eax", var_op);
+          } else {
+            LoadOperandToReg("eax", var_op);
+          }
           EmitInstruction("push", "eax");
         } else {
           EmitInstruction("push", interm_instr->operand1()->GetAsmOperand(*this));
