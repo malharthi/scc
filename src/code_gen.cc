@@ -84,11 +84,19 @@ void CodeGenerator::EmitInstruction(const std::string& mnem,
 // into a register
 void CodeGenerator::LoadOperandToReg(const std::string& reg,
                                      Operand* operand) {
+  
   std::string move_instr = "mov";
-
+  
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
-    if (var_op->GetSymbol()->data_type() == CHAR_TYPE) {
+    VariableSymbol* symbol = var_op->GetSymbol();
+
+    if (symbol->is_array()) {
+      LoadEffectiveAddress(reg, operand);
+      return;
+    }
+
+    if (symbol->data_type() == CHAR_TYPE) {
       move_instr = "movsx";
     }
   }

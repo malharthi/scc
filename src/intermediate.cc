@@ -26,12 +26,12 @@ std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
         << (variable_symbol->offset() + variable_symbol->size())
         << "]";
     
-    if (variable_symbol->is_array()) {
-      code_gen.EmitInstruction("lea", "ebx", op1.str());
-      operand_stream << "ebx";
-    } else {
+    // if (variable_symbol->is_array()) {
+    //   code_gen.EmitInstruction("lea", "ebx", op1.str());
+    //   operand_stream << "ebx";
+    // } else {
       operand_stream << op1.str();
-    }
+    // }
   } else {
     // symbol kind == ARGUMENT
     // Variable past as an argument (Just access the value)
@@ -68,7 +68,8 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
     // Array passed as an argument, so we have a pointer
     // Load the address (which is the value passed) to ebx as the base address, then
     // access the value at the required index in esi
-    code_gen.EmitInstruction("mov", "ebx", VariableOperand::GetAsmOperand(code_gen));
+    //code_gen.EmitInstruction("mov", "ebx", VariableOperand::GetAsmOperand(code_gen));
+    code_gen.LoadEffectiveAddress("ebx", VariableOperand::GetAsmOperand(code_gen));
     //VariableOperand::GetAsmOperand(code_gen);
 
     code_gen.LoadOperandToReg("esi", index_operand_);
