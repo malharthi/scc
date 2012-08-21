@@ -55,7 +55,7 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   const VariableSymbol* array_symbol = GetSymbol();
 
   if (array_symbol->kind() == LOCAL) {
-    // Regular static array created locally (Access the calue of the element)
+    // Regular static array created locally (Access the value of the element)
     code_gen.LoadOperandToReg("esi", index_operand_);
     operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
     operand_stream << "[ebp + esi * "
@@ -68,8 +68,10 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
     // Array passed as an argument, so we have a pointer
     // Load the address (which is the value passed) to ebx as the base address, then
     // access the value at the required index in esi
-    //code_gen.EmitInstruction("mov", "ebx", VariableOperand::GetAsmOperand(code_gen));
-    code_gen.LoadEffectiveAddress("ebx", VariableOperand::GetAsmOperand(code_gen));
+    //std::string asm_operand = VariableOperand::GetAsmOperand(code_gen);
+    //std::string clean_operand = code_gen.RemoveSizeSpecifier(array_symbol, asm_operand);
+    code_gen.EmitInstruction("mov", "ebx", VariableOperand::GetAsmOperand(code_gen));
+    //code_gen.LoadEffectiveAddress("ebx", VariableOperand::GetAsmOperand(code_gen));
     //VariableOperand::GetAsmOperand(code_gen);
 
     code_gen.LoadOperandToReg("esi", index_operand_);

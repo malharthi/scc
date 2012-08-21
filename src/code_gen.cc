@@ -86,12 +86,12 @@ void CodeGenerator::LoadOperandToReg(const std::string& reg,
                                      Operand* operand) {
   
   std::string move_instr = "mov";
-  
+
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
-    VariableSymbol* symbol = var_op->GetSymbol();
-
-    if (symbol->is_array()) {
+    const VariableSymbol* symbol = var_op->GetSymbol();
+     ArrayOperand* array_op = dynamic_cast< ArrayOperand*>(var_op);
+    if ((array_op == NULL) && (symbol->is_array())) {
       LoadEffectiveAddress(reg, operand);
       return;
     }
@@ -121,16 +121,23 @@ void CodeGenerator::StoreRegToAddress(Operand* operand,
   EmitInstruction("mov", operand->GetAsmOperand(*this), src_register);
 }
 
+// Remove nasm size specifiers from operands
+std::string CodeGenerator::RemoveSizeSpecifier(const VariableSymbol* symbol,
+                                               const std::string& operand_str) {
+  std::string clean_operand = operand_str;
+  std::string nasm_keyword;
+  nasm_keyword = symbol->data_type() == INT_TYPE? "dword " : "byte ";
+
+  str_helper::FindAndReplaceAll(clean_operand, nasm_keyword.c_str(), "");
+  return clean_operand;
+}
+
 // This function does a dirty trick, which is removing the 'dword' or 'byte'
 // keywords from the assembler operands returned from GetAsmOperand.
 void CodeGenerator::LoadEffectiveAddress(const std::string& reg, Operand* operand) {
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
-  std::string asm_operand = var_op->GetAsmOperand(*this);
-
-  std::string nasm_keyword;
-  nasm_keyword = var_op->GetSymbol()->data_type() == INT_TYPE? "dword " : "byte ";
-
-  str_helper::FindAndReplaceAll(asm_operand, nasm_keyword.c_str(), "");
+  std::string asm_operand = RemoveSizeSpecifier(var_op->GetSymbol(),
+                                                var_op->GetAsmOperand(*this));
 
   EmitInstruction("lea", reg, asm_operand);
 }
@@ -393,7 +400,7 @@ void CodeGenerator::GenerateCode() {
       {
         VariableOperand* var_op =
           dynamic_cast<VariableOperand*>(interm_instr->operand1());
-        if ((var_op != NULL) && (var_op->GetSymbol()->data_type() == CHAR_TYPE)) {
+        if ((var_op != NULL) /*&& (var_op->GetSymbol()->data_type() == CHAR_TYPE)*/) {
           LoadOperandToReg("eax", var_op);
           EmitInstruction("push", "eax");
         } else {

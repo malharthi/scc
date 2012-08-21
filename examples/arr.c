@@ -13,5 +13,5 @@ void main() {
 	// for (i=0; i<5; i++) {
 	// 	printInt(array[i]); printChar('\n');
 	// }
-	print_arr(i, 1);
+	print_arr(array, 5);
 }
