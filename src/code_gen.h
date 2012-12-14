@@ -38,6 +38,8 @@ class CodeGenerator {
   void LoadOperandToReg(const std::string& reg, Operand* operand);
   void StoreRegToAddress(Operand* operand, const std::string& reg);
   void LoadEffectiveAddress(const std::string& reg, Operand* operand);
+
+  std::string RemoveSizeSpecifier(const VariableSymbol* symbol, const std::string& operand_str);
   
  private:
   void WriteAssmblerCodeToStream();
