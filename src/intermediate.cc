@@ -15,35 +15,19 @@
 
 std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
-  std::stringstream op1;
 
   const VariableSymbol* variable_symbol = GetSymbol();
 
   operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
   // Regular local variable (Just return the value)
   if (variable_symbol->kind() == LOCAL) {
-    op1 << "[ebp - " // "ptr [ebp - " 
-        << (variable_symbol->offset() + variable_symbol->size())
-        << "]";
-    
-    // if (variable_symbol->is_array()) {
-    //   code_gen.EmitInstruction("lea", "ebx", op1.str());
-    //   operand_stream << "ebx";
-    // } else {
-      operand_stream << op1.str();
-    // }
+    operand_stream << "[ebp - " // "ptr [ebp - " 
+                   << (variable_symbol->offset() + variable_symbol->size())
+                   << "]";
   } else {
     // symbol kind == ARGUMENT
-    // Variable past as an argument (Just access the value)
-    
-    op1 << "[ebp + " << (variable_symbol->offset() + 8) << "]";
-    // "ptr [ebp - "
-    // if (variable_symbol->is_array()) {
-    //   code_gen.EmitInstruction("lea", "ebx", op1.str());
-    //   operand_stream << "ebx";
-    // } else {
-      operand_stream << op1.str();
-    //}
+    // Variable passed as an argument (Just access the value)
+    operand_stream << "[ebp + " << (variable_symbol->offset() + 8) << "]";
   }
   return operand_stream.str();
 }
@@ -59,7 +43,6 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
     code_gen.LoadOperandToReg("esi", index_operand_);
     operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
     operand_stream << "[ebp + esi * "
-                    // "ptr [ebp + esi * "
                    << array_symbol->element_size()
                    << " - " << (array_symbol->offset() + array_symbol->size())
                    << "]";
@@ -68,15 +51,14 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
     // Array passed as an argument, so we have a pointer
     // Load the address (which is the value passed) to ebx as the base address, then
     // access the value at the required index in esi
-    std::string mov_instr = array_symbol->data_type() == CHAR_TYPE? "movsx" : "mov";
-    code_gen.EmitInstruction(mov_instr, "ebx", VariableOperand::GetAsmOperand(code_gen));
+    std::string plain_operand = code_gen.RemoveSizeSpecifier(array_symbol,
+                                            VariableOperand::GetAsmOperand(code_gen));
+    code_gen.EmitInstruction("mov", "ebx", plain_operand);
 
     code_gen.LoadOperandToReg("esi", index_operand_);
     operand_stream << (array_symbol->data_type() == INT_TYPE? "dword " : "byte ");
     operand_stream << "[ebx + esi * "
-                    // "ptr [ebp + esi * "
                    << array_symbol->element_size()
-                   //<< " - " << (array_symbol->offset() + array_symbol->size())
                    << "]";
   }
 
