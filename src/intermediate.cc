@@ -51,7 +51,7 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
     // Array passed as an argument, so we have a pointer
     // Load the address (which is the value passed) to ebx as the base address, then
     // access the value at the required index in esi
-    std::string plain_operand = code_gen.RemoveSizeSpecifier(array_symbol,
+    std::string plain_operand = CodeGenerator::RemoveSizeSpecifier(array_symbol,
                                             VariableOperand::GetAsmOperand(code_gen));
     code_gen.EmitInstruction("mov", "ebx", plain_operand);
 

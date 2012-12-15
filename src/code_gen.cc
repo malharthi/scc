@@ -136,7 +136,7 @@ std::string CodeGenerator::RemoveSizeSpecifier(const VariableSymbol* symbol,
 // keywords from the assembler operands returned from GetAsmOperand.
 void CodeGenerator::LoadEffectiveAddress(const std::string& reg, Operand* operand) {
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
-  std::string asm_operand = RemoveSizeSpecifier(var_op->GetSymbol(),
+  std::string asm_operand = CodeGenerator::RemoveSizeSpecifier(var_op->GetSymbol(),
                                                 var_op->GetAsmOperand(*this));
 
   EmitInstruction("lea", reg, asm_operand);
@@ -406,6 +406,7 @@ void CodeGenerator::GenerateCode() {
           if (symbol->is_array() && symbol->kind() == LOCAL) {
             LoadEffectiveAddress("eax", var_op);
           } else {
+
             LoadOperandToReg("eax", var_op);
           }
           EmitInstruction("push", "eax");
