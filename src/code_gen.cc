@@ -398,15 +398,18 @@ void CodeGenerator::GenerateCode() {
 
     case PARAM_OP:
       {
-        VariableOperand* var_op =
-          dynamic_cast<VariableOperand*>(interm_instr->operand1());
+        VariableOperand* var_op = dynamic_cast<VariableOperand*>(interm_instr->operand1());
         if ((var_op != NULL) /*&& (var_op->GetSymbol()->data_type() == CHAR_TYPE)*/) {
           const VariableSymbol* symbol = var_op->GetSymbol();
           
           if (symbol->is_array() && symbol->kind() == LOCAL) {
+            // An array that is created locally (A chunk in the local stack not a pointer)
             LoadEffectiveAddress("eax", var_op);
+          } else if (symbol->is_array() && symbol->kind() == ARGUMENT) {
+            // We don't want movsx because we are moving a 32-bit pointer
+            EmitInstruction("mov", "eax", var_op->GetAsmOperand(*this));
           } else {
-
+            // Any othee parameter kind
             LoadOperandToReg("eax", var_op);
           }
           EmitInstruction("push", "eax");

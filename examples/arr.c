@@ -12,7 +12,7 @@ void str_arr(char str[], int len) {
 	for (i=0; i<len; i++) {
 		printChar(str[i]); printChar(' ');
 	}
-	//str_arr2(str, 4);
+	str_arr2(str, len);
 }
 // Increment every array element by one
 void inc_arr(int arr[], int len) {
@@ -34,8 +34,8 @@ void print_arr(int arr[], int len) {
 void main() {
 	int i=5;
 	int array[5] = { 10, 20, 32, 42, 16 };
-	char name[4] = "Greg";
-	str_arr(name, 4); printChar('\n');
+	char name[7] = "Gregory";
+	str_arr(name, 7); printChar('\n');
 	for (i=0; i<5; i++) {
 		printInt(array[i]); printChar(' ');
 	}

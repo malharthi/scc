@@ -18,15 +18,20 @@ std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
 
   const VariableSymbol* variable_symbol = GetSymbol();
 
-  operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
+  
   // Regular local variable (Just return the value)
   if (variable_symbol->kind() == LOCAL) {
+    operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
     operand_stream << "[ebp - " // "ptr [ebp - " 
                    << (variable_symbol->offset() + variable_symbol->size())
                    << "]";
   } else {
     // symbol kind == ARGUMENT
     // Variable passed as an argument (Just access the value)
+    if (variable_symbol->is_array()) {
+      // This is actually a pointer so just pass a 32-bit value
+      operand_stream << "dword ";
+    }
     operand_stream << "[ebp + " << (variable_symbol->offset() + 8) << "]";
   }
   return operand_stream.str();
