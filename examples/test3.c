@@ -1,7 +1,7 @@
 // SCC testing
 
-void hey(int a) {
-	printInt(a);
+void hey(char a) {
+	printChar(a);
 }
 void main() {
 	int y = 100;
@@ -9,11 +9,11 @@ void main() {
 	int c[2]={10, 3};
 	int b;
 
-	hey(10);
+	hey('A');
 
 	printInt(x);
 
 	b=c[0]+10;
-	printInt(b);
+	printInt(b);hey('\n');
 }
 

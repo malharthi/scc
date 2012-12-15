@@ -14,5 +14,5 @@ void main ()
 	}
 	
 	printStr("Factorial = ");
-	printInt(factorial);
+	printInt(factorial); printChar('\n');
 }

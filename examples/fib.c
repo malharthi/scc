@@ -20,4 +20,5 @@ void main() {
 	printInt(fib(x));
   if (x<10) 
     printInt(x);
+  printChar('\n');
 }

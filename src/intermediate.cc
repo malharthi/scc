@@ -31,6 +31,8 @@ std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
     if (variable_symbol->is_array()) {
       // This is actually a pointer so just pass a 32-bit value
       operand_stream << "dword ";
+    } else {
+      operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
     }
     operand_stream << "[ebp + " << (variable_symbol->offset() + 8) << "]";
   }

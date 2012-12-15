@@ -114,7 +114,8 @@ void CodeGenerator::StoreRegToAddress(Operand* operand,
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
     if (var_op->GetSymbol()->data_type() == CHAR_TYPE) {
-      src_register = reg[1] + "l";
+      src_register = reg.substr(1, 1);
+      src_register.append("l");
     }
   }
 
