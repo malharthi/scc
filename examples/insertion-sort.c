@@ -1,8 +1,7 @@
 
 /* insertion sort program*/
 
-void main()
-{	
+void main() {	
 	int array[10] = { 34, 11, 9, 0, 5, 2, 4, 3, 1, 4 };
 	int i, k, n=10;
 	

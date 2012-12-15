@@ -1,6 +1,5 @@
 
-void main ()
-{
+void main () {
 	int i, max;
 	int values[5];
 	

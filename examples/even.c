@@ -1,8 +1,7 @@
 
 // A program that lists even numbers between two numbers
 
-void main()
-{	
+void main() {	
 	int i, start, end;
 	
 	printStr("enter start number: ");

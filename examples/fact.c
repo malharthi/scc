@@ -1,8 +1,7 @@
 
 /* Factorial */
 
-void main ()
-{
+void main () {
 	int number, i, factorial = 1;
 	
 	printStr("enter a number: ");
