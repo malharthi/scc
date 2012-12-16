@@ -2,3 +2,4 @@
 
 examples/*
 !examples/*.c
+!examples/*.txt

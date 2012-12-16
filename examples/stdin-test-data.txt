@@ -1,0 +1,4 @@
+This is a sample file for stdin-test.c
+Any file read by the stdin-test program should
+end with '~' at the beggining of the last line.
+~
