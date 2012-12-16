@@ -126,10 +126,13 @@ void CodeGenerator::StoreRegToAddress(Operand* operand,
 std::string CodeGenerator::RemoveSizeSpecifier(const VariableSymbol* symbol,
                                                const std::string& operand_str) {
   std::string clean_operand = operand_str;
-  std::string nasm_keyword;
-  nasm_keyword = symbol->data_type() == INT_TYPE? "dword " : "byte ";
+  // std::string nasm_keyword;
+  // nasm_keyword = symbol->data_type() == INT_TYPE? "dword " : "byte ";
+  //str_helper::FindAndReplaceAll(clean_operand, nasm_keyword.c_str(), "");
 
-  str_helper::FindAndReplaceAll(clean_operand, nasm_keyword.c_str(), "");
+  str_helper::FindAndReplaceAll(clean_operand, "dword ", "");
+  str_helper::FindAndReplaceAll(clean_operand, "byte ", "");
+
   return clean_operand;
 }
 
