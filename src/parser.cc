@@ -18,10 +18,7 @@ Parser::Parser(Lexer* lexer,
     offset_(0) {
 
   current_scope_table_ = root_symbol_table_;
-  RESERVE_KEYWORDS
-
-  continue_stack_.push(NULL);
-  break_stack_.push(NULL);
+  RESERVE_KEYWORDS;
 }
 
 
@@ -744,7 +741,7 @@ void Parser::ParseStatement() {
   
         if (is_default) {
           if (is_default_parsed) {
-            Error("more than one default.");
+            Error("more than one 'default' label found.");
           }
   
           is_default_parsed = true;
@@ -806,7 +803,7 @@ void Parser::ParseStatement() {
           LabelOperand* break_target = break_stack_.top();
           Emit(new IntermediateInstr(GOTO_OP, break_target));
       } else {
-        Error("'break' statement is not allowed here.");
+        Error("'break' statement is not allowed in this location.");
       }
   
       Match(BREAK);
@@ -820,7 +817,7 @@ void Parser::ParseStatement() {
         LabelOperand* continue_target = continue_stack_.top();
         Emit(new IntermediateInstr(GOTO_OP, continue_target));
       } else {
-        Error("'continue' statement is not allowed here.");
+        Error("'continue' statement is not allowed in this location.");
       }
 
       Match(CONTINUE);
