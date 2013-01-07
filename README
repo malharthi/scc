@@ -17,10 +17,8 @@
 	compiler, which can be used to demonstrate how compilers can be implemented
 	in a language such as C++. So my goal was not creating a language, but
 	creating a compiler that you can look at and play with its code, and learn
-	from it. That is the reason I did not focus on improving the language,
-	because creating a language for no specific reason is pointless, unless it
-	fulfills a need or introduces new features. So instead, I kept on making the
-	compiler just work and generate correct assembler code.
+	from it. That is the reason I did not focus on improving the language. So instead, 
+	I focued on making the compiler just work and generate correct assembler code.
 
 
 2. STEPS FOR COMPILING AND RUNNING SCC
@@ -86,8 +84,7 @@
 
 	Both scanner and parser are hand-written (no lexer orparser generators are
 	used). The parser is a recursive-descent parser. However most of the
-	recursions were optimized for speed and converted into loops as it was
-	possible.
+	recursions were optimized and converted into loops as possible.
 
 	The front-end (lex and parser) is single pass, and generates intermediate
 	code immediately, and the back-end (code generator) is single pass as well,
@@ -104,10 +101,10 @@
 3.1 NOTE
 
 	I am sure you will encounter A LOT of bugs and weired behavior either in the
-	compilation process itself or in the generated intermediate or  assembler
-	code. I do not plan on fixing or developing this thing; however, you are
+	compilation process itself or in the generated intermediate or assembler
+	code. I do not plan on fixing or developing this; however, you are more than
 	welcome to inform me about anything you find. You can send me patches if you
-	want. I can be reached via (mohannad.harthi (at) gmail.com)
+	want. I can be reached at (mohannad.harthi (at) gmail.com)
 
 4. THE C SUBSET (OR THE C-LIKE LANGUAGE)
 
@@ -172,9 +169,8 @@
 	functions, such as printf and scanf. Also, these functions are treated as
 	keywords and thus are part of the language syntax.
 
-	Yo can define your own functions, of course, otherwise this compiler would
-	be so boring! However, it is important to know that you cannot write forward
-	declarations for functions:
+	Yo can define your own functions. However, it is important to know that you
+	cannot write forward declarations for functions:
 
 	int f(int x);
 
