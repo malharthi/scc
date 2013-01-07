@@ -15,10 +15,7 @@
 
 std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
-
   const VariableSymbol* variable_symbol = GetSymbol();
-
-  
   // Regular local variable (Just return the value)
   if (variable_symbol->kind() == LOCAL) {
     operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
@@ -44,7 +41,6 @@ std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
 std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   std::stringstream operand_stream;
   const VariableSymbol* array_symbol = GetSymbol();
-
   if (array_symbol->kind() == LOCAL) {
     // Regular static array created locally (Access the value of the element)
     code_gen.LoadOperandToReg("esi", index_operand_);
@@ -72,12 +68,10 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   return operand_stream.str();
 }
 
-
 std::string ArrayOperand::GetIntermediateOperand() {
   return str_helper::FormatString("%s[%s]", data().c_str(),
     index_operand_->GetIntermediateOperand().c_str());
 }
-
 
 // IntermediateInstr class implementation
 

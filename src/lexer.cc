@@ -22,7 +22,6 @@ Lexer::~Lexer() {
   input_stream_.close();
 }
 
-
 void Lexer::Error(const std::string& message) {
   std::stringstream message_stream;
   message_stream << "{ "
@@ -32,7 +31,6 @@ void Lexer::Error(const std::string& message) {
   lexical_errors_->push_back(message_stream.str());
 }
 
-
 void Lexer::ReadChar() {
   if (!input_stream_.get(current_character_))
     current_character_ = EOF;
@@ -41,11 +39,9 @@ void Lexer::ReadChar() {
     current_location_.set_line(current_location_.line() + 1);
 }
 
-
 char Lexer::PeekChar() {
   return input_stream_.peek();
 }
-
 
 void Lexer::StepBack(int steps) {
   std::ifstream::pos_type pos;
@@ -62,7 +58,6 @@ void Lexer::StepBack(int steps) {
   input_stream_.seekg(pos);
 }
 
-
 Token Lexer::PeekToken(SymbolTable& symbol_table) {
   std::ifstream::pos_type pos = input_stream_.tellg();
   //pos-=1;
@@ -72,13 +67,11 @@ Token Lexer::PeekToken(SymbolTable& symbol_table) {
   return token;
 }
 
-
 Token Lexer::GetNextToken(SymbolTable& symbol_table) {
   std::ifstream::pos_type pos = input_stream_.tellg();
   source_pointers_.push(pos);
   return ScanToken(symbol_table);
 }
-
 
 Token Lexer::ScanToken(SymbolTable& symbol_table) {
   //bool is_comment;
@@ -235,7 +228,6 @@ start:
   // EOF token
   return Token(static_cast<TokenCode>(EOF), "", current_location_);
 }
-
 
 TokenType Lexer::GetTokenType(const std::string& lexeme) {
   const int length = 11;

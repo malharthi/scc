@@ -72,11 +72,9 @@ std::string GetTokenString(TokenCode token_code) {
   return token_names.token_names.find(token_code)->second;
 }
 
-
 bool SymbolTable::IsInCurrentScope(const std::string& lexeme) const {
   return table_.find(lexeme) != table_.end();
 }
-
 
 SymbolTable::~SymbolTable() {
   std::vector<SymbolTable*>::iterator vector_it;
@@ -92,7 +90,6 @@ SymbolTable::~SymbolTable() {
     delete it->second;
 }
 
-
 bool SymbolTable::Insert(const std::string& lexeme, TokenCode code) {
   bool is_inserted;
   Symbol* symbol = new Symbol(lexeme, code);
@@ -102,7 +99,6 @@ bool SymbolTable::Insert(const std::string& lexeme, TokenCode code) {
 
   return is_inserted;
 }
-
 
 bool SymbolTable::Insert(Symbol* symbol) {
   std::string lexeme = symbol->lexeme();
@@ -114,7 +110,6 @@ bool SymbolTable::Insert(Symbol* symbol) {
   table_[lexeme] = symbol;
   return true;
 }
-
 
 Symbol* SymbolTable::operator [](const std::string& key) {
   SymbolTable* current_scope = this;

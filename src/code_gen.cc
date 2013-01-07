@@ -22,7 +22,6 @@
 // to assembler code.
 void CodeGenerator::EmitComment(std::string comment) {
   //assembler_code.push_back(str_helper::FormatString("\t%s", comment.c_str()));
-  
   // Remove the tab character at the begining of the intermediate instruction
   comment.erase(0, 1);
   // Remove the new line character at the end of the intermediate instruction
@@ -33,23 +32,19 @@ void CodeGenerator::EmitComment(std::string comment) {
   assembler_code_.push_back(s.str());
 }
 
-
 void CodeGenerator::EmitLabel(const std::string& label) {
   std::stringstream s;
   s << label << ":\n";
   assembler_code_.push_back(s.str());
 }
 
-
 void CodeGenerator::EmitDirective(const std::string& directive) {
   assembler_code_.push_back(str_helper::FormatString("%s\n", directive.c_str()));
 }
 
-
 void CodeGenerator::EmitInstruction(const std::string& mnem) {
   assembler_code_.push_back(str_helper::FormatString("\t%s\n", mnem.c_str()));
 }
-
 
 void CodeGenerator::EmitInstruction(const std::string& mnem,
                                     const std::string& p) {
@@ -57,7 +52,6 @@ void CodeGenerator::EmitInstruction(const std::string& mnem,
   instruction = str_helper::FormatString("\t%s \t%s\n", mnem.c_str(), p.c_str());
   assembler_code_.push_back(instruction);
 }
-
 
 void CodeGenerator::EmitInstruction(const std::string& mnem,
                                     const std::string& p1,
@@ -67,7 +61,6 @@ void CodeGenerator::EmitInstruction(const std::string& mnem,
                                          p1.c_str(), p2.c_str());
   assembler_code_.push_back(instruction);
 }
-
 
 void CodeGenerator::EmitInstruction(const std::string& mnem,
                                     const std::string& p1,
@@ -79,14 +72,11 @@ void CodeGenerator::EmitInstruction(const std::string& mnem,
   assembler_code_.push_back(instruction);
 }
 
-
 // Generates a code that loads the content of a memory location
 // into a register
 void CodeGenerator::LoadOperandToReg(const std::string& reg,
                                      Operand* operand) {
-  
   std::string move_instr = "mov";
-
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
     const VariableSymbol* symbol = var_op->GetSymbol();
@@ -100,17 +90,14 @@ void CodeGenerator::LoadOperandToReg(const std::string& reg,
       move_instr = "movsx";
     }
   }
-
   EmitInstruction(move_instr, reg, operand->GetAsmOperand(*this));
 }
-
 
 // Generates a code that transfters the content of a register into
 // a memory location (Do not use any index registers here)
 void CodeGenerator::StoreRegToAddress(Operand* operand,
                                       const std::string& reg) {
   std::string src_register = reg;
-
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
     if (var_op->GetSymbol()->data_type() == CHAR_TYPE) {
@@ -118,7 +105,6 @@ void CodeGenerator::StoreRegToAddress(Operand* operand,
       src_register.append("l");
     }
   }
-
   EmitInstruction("mov", operand->GetAsmOperand(*this), src_register);
 }
 
@@ -129,10 +115,8 @@ std::string CodeGenerator::RemoveSizeSpecifier(const VariableSymbol* symbol,
   // std::string nasm_keyword;
   // nasm_keyword = symbol->data_type() == INT_TYPE? "dword " : "byte ";
   //str_helper::FindAndReplaceAll(clean_operand, nasm_keyword.c_str(), "");
-
   str_helper::FindAndReplaceAll(clean_operand, "dword ", "");
   str_helper::FindAndReplaceAll(clean_operand, "byte ", "");
-
   return clean_operand;
 }
 
@@ -142,10 +126,8 @@ void CodeGenerator::LoadEffectiveAddress(const std::string& reg, Operand* operan
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   std::string asm_operand = CodeGenerator::RemoveSizeSpecifier(var_op->GetSymbol(),
                                                 var_op->GetAsmOperand(*this));
-
   EmitInstruction("lea", reg, asm_operand);
 }
-
 
 void CodeGenerator::GenerateCode() {
   // Generate data and code segments and initilize data
@@ -155,14 +137,11 @@ void CodeGenerator::GenerateCode() {
 #else
   EmitDirective("extern printf, scanf, gets");
 #endif
-
   EmitDirective("segment .data");
   EmitDirective("__print_read_Int_format: db \"%d\",0,0");
   EmitDirective("__printChar_format: db \"%c\",0,0");
   EmitDirective("__read_Str_format: db \"%s\",0,0");
-  
   EmitDirective("segment .text");
-
 #if defined __APPLE__ 
   EmitDirective("global _main");
 #else
@@ -172,7 +151,6 @@ void CodeGenerator::GenerateCode() {
   IntermediateInstrsList::iterator it;
   for (it = intermediate_code->begin(); it != intermediate_code->end(); it++) {
     IntermediateInstr* interm_instr =  (*it);
-
     // Emit a commented intermediate instruction before
     // each set of assembler code, exclude labels
     if (interm_instr->operation() != LABEL_OP) {
@@ -261,8 +239,7 @@ void CodeGenerator::GenerateCode() {
 
       if (dynamic_cast<NumberOperand*>(interm_instr->operand3()) != NULL) {
         // Immidiate operands are not allowed in division
-        EmitInstruction("mov", "ecx", interm_instr->operand3()->
-                                                      GetAsmOperand(*this));
+        EmitInstruction("mov", "ecx", interm_instr->operand3()->GetAsmOperand(*this));
         EmitInstruction("idiv", "ecx");
       } else {
         EmitInstruction("idiv", interm_instr->operand3()->GetAsmOperand(*this));
@@ -405,7 +382,6 @@ void CodeGenerator::GenerateCode() {
         VariableOperand* var_op = dynamic_cast<VariableOperand*>(interm_instr->operand1());
         if ((var_op != NULL) /*&& (var_op->GetSymbol()->data_type() == CHAR_TYPE)*/) {
           const VariableSymbol* symbol = var_op->GetSymbol();
-          
           if (symbol->is_array() && symbol->kind() == LOCAL) {
             // An array that is created locally (A chunk in the local stack not a pointer)
             LoadEffectiveAddress("eax", var_op);
@@ -432,24 +408,17 @@ void CodeGenerator::GenerateCode() {
       if (interm_instr->operand1() != NULL) {
         LoadOperandToReg("eax", interm_instr->operand1());
       }
-
       //EmitInstruction("leave");
-
       EmitInstruction("mov", "esp", "ebp");
       //EmitInstruction("add", "esp", interm_instr->operand1()->GetAsmOperand(*this));
-
       //EmitInstruction("pop", "ebx");
       EmitInstruction("pop", "ebp");
-      
       EmitInstruction("ret");
       break;
-
     }
   }
-
   WriteAssmblerCodeToStream();
 }
-
 
 void CodeGenerator::WriteAssmblerCodeToStream() {
   std::vector<std::string>::iterator it;

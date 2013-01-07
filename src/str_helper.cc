@@ -26,7 +26,6 @@ void FindAndReplaceAll(std::string& source,
   }
 }
 
-
 std::string FormatString(std::string format_str, ...) {
   va_list arg_list;
   va_start(arg_list, format_str);
@@ -38,7 +37,6 @@ std::string FormatString(std::string format_str, ...) {
   va_end(arg_list);
   return std::string(buffer);
 }
-
 
 std::string RemoveExtensionFromFileName(const std::string& file_name) {
   size_t last_index = file_name.find_last_of(".");

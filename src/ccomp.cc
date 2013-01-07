@@ -18,10 +18,8 @@ void PrintToken(Token tok) {
   std::cout << tok.lexeme() /*<< " | " << tok.code()*/ << std::endl;
 }
 
-
 void Lex(const std::string file, std::vector<Message>& errors_list) {
   Lexer lexer(file, &errors_list);
-  
   SymbolTable symbol_table;
   Token token = lexer.GetNextToken(symbol_table);
 
@@ -30,7 +28,6 @@ void Lex(const std::string file, std::vector<Message>& errors_list) {
    token = lexer.GetNextToken(symbol_table);
   } while (token.code() != END_OF_FILE);
 }
-
 
 int Compile(const std::string& file, std::vector<Message>& errors_list) {
   // The executable output file name (no extension for *nix systems)
@@ -43,7 +40,6 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
     str_helper::FormatString("%s.s", output_file_name_no_ext.c_str());
   
   IntermediateInstrsList interm_code;
-
   Lexer lexer(file, &errors_list);
   Parser parser(&lexer, &interm_code, &errors_list);
   parser.Parse();
@@ -75,7 +71,6 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
     std::string assembler_cmd = str_helper::FormatString("nasm -f macho -o %s.o %s",
                                                       output_file_name_no_ext.c_str(),
                                                       output_file_name_assembler.c_str());
-
 #else
     // Linux
     std::string assembler_cmd = str_helper::FormatString("nasm -f elf -o %s.o %s",
@@ -86,7 +81,6 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
     std::string linker_cmd = str_helper::FormatString("gcc -m32 -o %s %s.o",
                                                       output_file_name_no_ext.c_str(),
                                                       output_file_name_no_ext.c_str());
-
     ret_code = system(assembler_cmd.c_str());
     if (ret_code == 0) {
       ret_code = system(linker_cmd.c_str());
@@ -97,7 +91,6 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
 
   return ret_code;
 }
-
 
 int main(int argc, char* argv[]) {
   std::cout << "Simple C Compiler (SCC)" << std::endl;
@@ -126,7 +119,6 @@ int main(int argc, char* argv[]) {
   
   if (!errors_list.empty()) {
     ret_code = 1;
-
     std::vector<Message>::iterator it;
     for (it = errors_list.begin(); it != errors_list.end(); it++) {
       std::cout << it->location().line() << ": ";
