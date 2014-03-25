@@ -1,200 +1,205 @@
-                Simple C-Subset (or C-like lang) Compiler (SCC)
+                
+            Simple C-Subset (or C-like language) Compiler (SCC)
 
 
 1. INTRODUCTION
 
-	Simple C-Subset Compiler is my final project for my bachelor degree.
-	It translates source programs written in a subset of the C language into
-	Intel i386 assembly language, which will be then passed to an assembler to
-	generate executable files.
+    Simple C-Subset Compiler is my final project for my bachelor degree.
+    It translates source programs written in a subset of the C language into
+    Intel i386 assembly language, which will be then passed to an assembler to
+    generate executable files.
 
-	The subset is simple, there is no support for pointers or structures. The
-	compiler only supports the basic C statements, two data types including
-	a basic implementation of arrays and strings, in addition to functions. There
-	are also several built-in functions for basic IO within the system terminal.
+    The subset is simple, there is no support for pointers or structures. The
+    compiler only supports the basic C statements, two data types including
+    a basic implementation of arrays and strings, in addition to functions.
+    There are also several built-in functions for basic IO within the system
+    terminal.
 
-	The goal of this project is to provide a simple and a fully working
-	compiler, which can be used to demonstrate how compilers can be implemented
-	in C++.
+    The goal of this project is to provide a simple fully working compiler,
+    which can be used to demonstrate how compilers can be implemented in C++.
 
 
 2. STEPS FOR COMPILING AND RUNNING SCC
 
-	Currently SCC generates code that works on Linux (and OS X sometimes), so these are the steps
-	to compile and run SCC on Linux: (It was tested on Ubuntu Linux)
+    Currently SCC generates code that works on Linux (and OS X sometimes),
+    so these are the steps to compile and run SCC on Linux (It was tested on
+    Ubuntu Linux):
 
-	- Download the source code (no binaries are provided).
-	- Make sure you have gcc, python, and nasm (the assembler) installed.
-	- To install GCC in Ubuntu:
+    - Download the source code (no binaries are provided).
+    - Make sure you have gcc, python, and nasm (the assembler) installed.
+    - To install GCC in Ubuntu:
 
-		sudo apt-get install build-essential
+        sudo apt-get install build-essential
 
-	- To install nasm in Ubuntu:
+    - To install nasm in Ubuntu:
 
-		sudo apt-get install nasm
+        sudo apt-get install nasm
 
-	- To Compile SCC:
+    - To Compile SCC:
 
-		unzip scc
-		cd scc
+        unzip scc
+        cd scc
+        ./build.py
 
-		./build.py
+    The resulted binary for SCC will be residing in the 'build' directory.
 
-	  The resulted binary for SCC will be residing in the 'build' directory.
+    - To compile one of the examples:
 
-	- To compile one of the examples:
+        ./build/scc ./tests/fact-rec.c
 
-		./build/scc ./tests/fact-rec.c
+    Note: If there are no messages that means the example was
+    compiled successfully. (In OS X you will probably see a warning
+    from the linker, you can ignore it).
 
-		Note: If there are no messages that means the example was
-		compiled successfully. (In OS X you will probably see a warning from the 
-		linker).
+    - To run the generated executable:
 
-	- To run the generated executable:
+        ./tests/fact-rec
 
-		./tests/fact-rec
+    Notes:
 
-	Notes:
-	 - The compiler only accepts one source file.
-	 - The comiler will generate 3 files. For example, if you compile fact-rec.c
-	   you will get:
-	 	- fact-rec.intermediate: contains the intermediate code (3-address code assembly-like language)
-	 	- fact-rec.s: contains the Intel i386 assembler code.
-	 	- fact-rec: the executable file
-	 	- You will see a fourth file, fact-rec.o, which is the object code file needed
-	 	  before linking. You can delete this one.
-	 - The directory scc/examples/ contains some code examples to test with SCC.
+    - The compiler only accepts one source file.
+    - The comiler will generate 3 files. For example, if you compile fact-rec.c
+      you will get:
+    - fact-rec.intermediate: contains the intermediate code (3-address
+      code assembly-like language)
+    - fact-rec.s: contains the Intel i386 assembler code.
+    - fact-rec: the executable file
+    - You will see a fourth file, fact-rec.o, which is the object code file
+      needed before linking. You can delete this one.
+    - The directory scc/examples/ contains some code examples to test with SCC.
 
 
 3. IMPLEMENTATION
 
-	The original compiler was written in C#. This is a port of the original work
-	into C++.
-	
-	The compiler supports compiling and linking in Linux and OS X binary formats,
-	ELF and MACHO respectively.  For now the generated assembly code works perfectly
-	in Linux. In OS X, there are some problems and programs might seg-fault, because
-	of the strict ABI (Application Binary Interface) requirements in OS X.
-	For instance, the stack should be aligned in a specific way in order to be able to
-	call functions from dynamically linked libraries, such as glibc, which programs
-	compiled by SCC are linked to.
+    The original compiler was written in C#. This is a port of the original work
+    into C++.
 
-	Both scanner and parser are hand-written (no lexer or parser generators were
-	used). The parser is a traditional recursive-descent parser.
+    The compiler supports compiling and linking in Linux and OS X binary
+    formats, ELF and MACHO respectively. For now the generated assembly code
+    works perfectly in Linux. In OS X, there are some problems, and programs
+    might seg-fault, because of the strict ABI (Application Binary Interface)
+    requirements in OS X. For instance, the stack should be aligned in a
+    specific way in order to be able to call functions from dynamically linked
+    libraries, such as glibc, which programs compiled by SCC are linked to.
 
-	The front-end (lex and parser) is a single pass, and generates intermediate
-	code immediately, and the back-end (code generator) is single pass as well,
-	which takes the intermediate code and translates it into the equivalent
-	instructions of the i386 assembly. It was written this way so it would be
-	possible to add an optimization phase to one or both of the two passes later
-	on.
+    Both scanner and parser are hand-written (no lexer or parser generators were
+    used). The parser is a traditional recursive-descent parser.
 
-	The resulting assembly code is assembled using the nasm assembler and is
-	linked using the linker included with the GCC tool-chain. Both are required
-	to compile the source code automatically. The final executable file is
-	linked to C runtime library and glibc.
+    The front-end (lex and parser) is a single pass, and generates intermediate
+    code immediately, and the back-end (code generator) is single pass as well,
+    which takes the intermediate code and translates it into the equivalent
+    instructions of the i386 assembly. It was written this way so it would be
+    possible to add an optimization phase to one or both of the two passes later
+    on.
+
+    The resulting assembly code is assembled using the nasm assembler and is
+    linked using the linker included with the GCC tool-chain. Both are required
+    to compile the source code automatically. The final executable file is
+    linked to C runtime library and glibc.
 
 3.1 NOTE
 
-	In case you encounter bugs and weired behavior either in the
-	compilation process itself or in the generated intermediate or assembler
-	code, you can report them to me. However, I do not plan to fixing, but you are more
-	than welcome to inform me about anything you find. You can send me patches if you
-	want. I can be reached at (mohannad.harthi (at) gmail.com)
+    In case you encounter bugs and strange behavior either in the compilation
+    process itself, in the generated intermediate or assembler code, or in
+    executable programs, please report what you find to me. However, I do not
+    plan on keeping fixing bugs, but you are more than welcome to inform me
+    about anything you find. You can send me patches if you want. I can be
+    reached at (mohannad.harthi (at) gmail.com).
 
 4. THE C SUBSET (OR THE C-LIKE LANGUAGE)
 
-	The compiler can compile a subset of the C language, which is described
-	below:
+    The compiler can compile a subset of the C language, which is described
+    below:
 
 4.1. DATA TYPES
-	
-	The subset supports two data types:
-		1. int  : 32-bit signed integer.
-		2. char : 8-bit unsigned integer.
-	
-	Static arrays are only supported.
+  
+    The subset supports two data types:
 
-	In the first implementation, arrays were not implemented as pointers. If you
-	pass an array to a function, the first element will be passed instead, which
-	obviously is not the correct behavior. Now that has changed, so you can pass
-	arrays to functions. Internally, arrays are passed as pointers, so any
-	modifications to the arrays will affect the array in the caller function as
-	well. Also, if you exceed the length of the array, the stack of the caller
-	will be corrupted.
+    1. int: 32-bit signed integer.
+    2. char: 8-bit unsigned integer.
 
-	Local variables in each scope should be declared at the beginning of the the
-	scope block before any other statements, just like the good old C89.
+    And only Static arrays are supported.
+
+    In the initial implementation, arrays were not implemented as pointers. If
+    you pass an array to a function, the first element will be passed instead,
+    which obviously is not the correct behavior. Now that has changed, so you
+    can pass arrays to functions. Internally, arrays are passed as pointers, so
+    any modifications to the arrays will affect the array in the caller function
+    as well. Also, if you exceed the length of the array, the stack of the
+    caller will be corrupted.
+
+    Local variables in each scope should be declared at the beginning of blocks
+    before any other statements, just like the good old C89.
 
 4.2 LITERALS
-	
-	- Integers: e.g., 2343, -323 
-	- Strings (as char arrays): e.g., "Hi, \r\n My name is Mohannad \t"
-	- Characters: e.g., 'a', '\n'
-	
+  
+    - Integers: e.g., 2343, -323 
+    - Strings (as char arrays): e.g., "Hi, \r\n My name is Mohannad \t"
+    - Characters: e.g., 'a', '\n'
+  
 
 4.3 EXPRESSIONS
-	
-	These are the only operators supported in expressions:
-    +, -, post ++ and --,  *, /, %, <, <=, >, >=, ==, ||, &&
+  
+    These are the only operators supported in expressions:
+    
+      +, -, post ++ and --,  *, /, %, <, <=, >, >=, ==, ||, &&
     
     Short circuits are not supported in boolean expressions.
 
 4.4 STATEMENTS
-	
-	- if-else statement.
-	- switch statement.
-	- while statement.
-	- do-while statement.
-	- for statement. (Statement lists are not supported)
-	- break and continue statements.
+  
+    - if-else statement.
+    - switch statement.
+    - while statement.
+    - do-while statement.
+    - for statement. (Statement lists are not supported)
+    - break and continue statements.
 
 4.5 FUNCTIONS
-	
-	There are several built-in functions for basic IO, which are described
-	below:
-	
-	- printStr(char str[]); printStr("string");
-		Prints a null-terminated string into stdout.
-	- printChar(char c);
-	- printInt(int n);
-	- readStr(char buffer[], int bufferSize);
-	- readInt(int n)
-	
-	Note: Theses functions are translated into calls to the standard C IO
-	functions, such as printf and scanf. Also, these functions are treated as
-	keywords and thus are part of the language syntax.
+  
+    There are several built-in functions for basic IO, which are described
+    below:
 
-	Yo can define your own functions. However, it is important to know that you
-	cannot write forward declarations for functions such as:
+    - printStr(char str[]); printStr("string");
+    - printChar(char c);
+    - printInt(int n);
+    - readStr(char buffer[], int bufferSize);
+    - readInt(int n)
 
-	int f(int x);
+    Note: Theses functions are translated into calls to the standard C IO
+    functions, such as printf and scanf. Also, these functions are treated as
+    keywords and thus are part of the language syntax.
 
-	So you should be careful about the order in which you define your functions especially
-	when you have too many functions that call each other.
+    Yo can define your own functions. However, it is important to know that you
+    cannot write forward declarations for functions such as:
 
-	Additionally, scope is implemented properly (I think). So visibility, scope, and
-	life time of local variables are supposed to work the same way as a
-	real C compiler, unless there is something I did not get right. However, there
-	is no public scope (global variables), but, inside functions, you
-	can have nested scopes with as many levels as you want. For example:
+    int f(int x);
 
-	void foo()
-	{
-		int x, y;
-		// Nested block
-		{
-			int x; // Different x
+    So you should be careful about the order in which you define your functions
+    especially when you have too many functions that call each other.
 
-			if (true)
-			{
-				int x; // Another x in the if's block
+    Additionally, scope is implemented properly (I think). So visibility, scope,
+    and life time of local variables are supposed to work the same way as a
+    real C compiler, unless there is something I did not get right. However,
+    there is no public scope (global variables), but, inside functions, you
+    can have nested scopes with as many levels as you want. For example:
 
-			}
-		}
-	}
+    void foo()
+    {
+      int x, y;
+      // Nested block
+      {
+        int x; // Different x
 
-	There are many limitations in the language. For instance, there is no type
-	checking, and the semantic analysis is very limited (like matching arguments and paramaeters).
-	
+        if (true)
+        {
+          int x; // Another x in the if's block
+        }
+      }
+    }
+
+    There are many limitations in the language. For instance, there is no type
+    checking, and the semantic analysis is very limited (like matching arguments
+    and paramaeters).
+  
 
