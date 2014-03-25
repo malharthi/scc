@@ -199,7 +199,7 @@
     }
 
     Lastly, there are many limitations in the language. For instance, there is
-    no type checking, and the semantic analysis is very, very limited (like matching arguments
-    and paramaeters).
+    no type checking, and the semantic analysis is limited to simple stuff, like
+    matching the number of arguments and paramaeters in function calls.
   
 
