@@ -6,10 +6,10 @@
 
     Simple C-Subset Compiler is my final project for my bachelor degree.
     It translates source programs written in a subset of the C language into
-    Intel i386 assembly language, which will be then passed to an assembler to
-    generate executable files.
+    Intel i386 assembly language, which will be then passed on to an assembler
+    in order to generate executable files.
 
-    The subset is simple, there is no support for pointers or structures. The
+    The C-subset is simple. There is no support for pointers or structures. The
     compiler only supports the basic C statements, two data types including
     a basic implementation of arrays and strings, in addition to functions.
     There are also several built-in functions for basic IO within the system
@@ -58,7 +58,7 @@
     Notes:
 
     - The compiler only accepts one source file.
-    - The comiler will generate 3 files. For example, if you compile fact-rec.c
+    - The compiler will generate 3 files. For example, if you compile fact-rec.c
       you will get:
     - fact-rec.intermediate: contains the intermediate code (3-address
       code assembly-like language)
@@ -72,7 +72,7 @@
 3. IMPLEMENTATION
 
     The original compiler was written in C#. This is a port of the original work
-    into C++.
+    to C++.
 
     The compiler supports compiling and linking in Linux and OS X binary
     formats, ELF and MACHO respectively. For now the generated assembly code
@@ -95,7 +95,7 @@
     The resulting assembly code is assembled using the nasm assembler and is
     linked using the linker included with the GCC tool-chain. Both are required
     to compile the source code automatically. The final executable file is
-    linked to C runtime library and glibc.
+    linked to the C runtime library and glibc.
 
 3.1 NOTE
 
@@ -165,8 +165,8 @@
     - printInt(int n);
     - readStr(char buffer[], int bufferSize);
     - readInt(int n)
-
-    Note: Theses functions are translated into calls to the standard C IO
+                    
+    Theses functions are translated into calls to the standard C IO
     functions, such as printf and scanf. Also, these functions are treated as
     keywords and thus are part of the language syntax.
 
@@ -175,13 +175,13 @@
 
     int f(int x);
 
-    So you should be careful about the order in which you define your functions
+    So you should be careful about the order in which you define your functions,
     especially when you have too many functions that call each other.
 
-    Additionally, scope is implemented properly (I think). So visibility, scope,
+    Additionally, scope is implemented properly (I think). So, visibility, scope,
     and life time of local variables are supposed to work the same way as a
     real C compiler, unless there is something I did not get right. However,
-    there is no public scope (global variables), but, inside functions, you
+    there is no public scope (global variables), but inside functions, you
     can have nested scopes with as many levels as you want. For example:
 
     void foo()
@@ -198,8 +198,8 @@
       }
     }
 
-    There are many limitations in the language. For instance, there is no type
-    checking, and the semantic analysis is very limited (like matching arguments
+    Lastly, there are many limitations in the language. For instance, there is
+    no type checking, and the semantic analysis is very, very limited (like matching arguments
     and paramaeters).
   
 
