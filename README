@@ -8,22 +8,19 @@
 	Intel i386 assembly language, which will be then passed to an assembler to
 	generate executable files.
 
-	The subset is simple, there are no pointers or structures for example. The
+	The subset is simple, there is no support for pointers or structures. The
 	compiler only supports the basic C statements, two data types including
-	basic implementation for arrays and strings, in addition to functions. There
+	a basic implementation of arrays and strings, in addition to functions. There
 	are also several built-in functions for basic IO within the system terminal.
 
 	The goal of this project is to provide a simple and a fully working
 	compiler, which can be used to demonstrate how compilers can be implemented
-	in a language such as C++. So my goal was not creating a language, but
-	creating a compiler that you can look at and play with its code, and learn
-	from it. That is the reason I did not focus on improving the language. So instead, 
-	I focued on making the compiler just work and generate correct assembler code.
+	in C++.
 
 
 2. STEPS FOR COMPILING AND RUNNING SCC
 
-	Currently SCC generates code that works on Linux, so these are the steps
+	Currently SCC generates code that works on Linux (and OS X sometimes), so these are the steps
 	to compile and run SCC on Linux: (It was tested on Ubuntu Linux)
 
 	- Download the source code (no binaries are provided).
@@ -49,9 +46,9 @@
 
 		./build/scc ./tests/fact-rec.c
 
-		Note: If there are no messages then that means the example was
-		compiled correctly. (In OS X you will probably see a warning from the 
-		linker.)
+		Note: If there are no messages that means the example was
+		compiled successfully. (In OS X you will probably see a warning from the 
+		linker).
 
 	- To run the generated executable:
 
@@ -59,12 +56,12 @@
 
 	Notes:
 	 - The compiler only accepts one source file.
-	 - The comiler will generate 3 files. E.g., if you compiled fact-rec.c
+	 - The comiler will generate 3 files. For example, if you compile fact-rec.c
 	   you will get:
-	 	- fact-rec.intermediate: contains intermediate code (3-address code)
+	 	- fact-rec.intermediate: contains the intermediate code (3-address code assembly-like language)
 	 	- fact-rec.s: contains the Intel i386 assembler code.
 	 	- fact-rec: the executable file
-	 	- You will see a fourth file, fact-rec.o, which is the object code
+	 	- You will see a fourth file, fact-rec.o, which is the object code file needed
 	 	  before linking. You can delete this one.
 	 - The directory scc/examples/ contains some code examples to test with SCC.
 
@@ -72,38 +69,37 @@
 3. IMPLEMENTATION
 
 	The original compiler was written in C#. This is a port of the original work
-	to C++ since I moved to OS X, and I believe that it is more convenient for
-	me and many others to play with the code in C++ on a UNIX-based platform.
-	The compiler supports compiling and linking in Linux and OS X formats, ELF
-	and MACHO respectively.  For now the generated assembly code works perfectly
-	in Linux. In OS X, there are some problems and programs might seg fault.
-	Original plan was to make to work on OS X, but OS X has more strict ABI (App.
-	Binary Interface) requirements. For instance, stack should be aligned in a
-	specific way in order to be able to call functions from dynamically linked
-	libraries, such as glibc, which programs compiled by SCC are linked to.
+	into C++.
+	
+	The compiler supports compiling and linking in Linux and OS X binary formats,
+	ELF and MACHO respectively.  For now the generated assembly code works perfectly
+	in Linux. In OS X, there are some problems and programs might seg-fault, because
+	of the strict ABI (Application Binary Interface) requirements in OS X.
+	For instance, the stack should be aligned in a specific way in order to be able to
+	call functions from dynamically linked libraries, such as glibc, which programs
+	compiled by SCC are linked to.
 
-	Both scanner and parser are hand-written (no lexer orparser generators are
-	used). The parser is a recursive-descent parser. However most of the
-	recursions were optimized and converted into loops as possible.
+	Both scanner and parser are hand-written (no lexer or parser generators were
+	used). The parser is a traditional recursive-descent parser.
 
-	The front-end (lex and parser) is single pass, and generates intermediate
+	The front-end (lex and parser) is a single pass, and generates intermediate
 	code immediately, and the back-end (code generator) is single pass as well,
-	which takes the intermediate code and translate  it to the equivalent
+	which takes the intermediate code and translates it into the equivalent
 	instructions of the i386 assembly. It was written this way so it would be
 	possible to add an optimization phase to one or both of the two passes later
 	on.
 
-	The resulting assembly code is assembled using the nasm assembler and
+	The resulting assembly code is assembled using the nasm assembler and is
 	linked using the linker included with the GCC tool-chain. Both are required
 	to compile the source code automatically. The final executable file is
 	linked to C runtime library and glibc.
 
 3.1 NOTE
 
-	I am sure you will encounter A LOT of bugs and weired behavior either in the
+	In case you encounter bugs and weired behavior either in the
 	compilation process itself or in the generated intermediate or assembler
-	code. I do not plan on fixing or developing this; however, you are more than
-	welcome to inform me about anything you find. You can send me patches if you
+	code, you can report them to me. However, I do not plan to fixing, but you are more
+	than welcome to inform me about anything you find. You can send me patches if you
 	want. I can be reached at (mohannad.harthi (at) gmail.com)
 
 4. THE C SUBSET (OR THE C-LIKE LANGUAGE)
@@ -119,9 +115,9 @@
 	
 	Static arrays are only supported.
 
-	In the first implementation, arrays were not implemented as pointers, if you
-	pass an array to a function the first element will be passed instead, which
-	obviously is not the correct behavior. Now that has changed you can pass
+	In the first implementation, arrays were not implemented as pointers. If you
+	pass an array to a function, the first element will be passed instead, which
+	obviously is not the correct behavior. Now that has changed, so you can pass
 	arrays to functions. Internally, arrays are passed as pointers, so any
 	modifications to the arrays will affect the array in the caller function as
 	well. Also, if you exceed the length of the array, the stack of the caller
@@ -133,13 +129,13 @@
 4.2 LITERALS
 	
 	- Integers: e.g., 2343, -323 
-	- Strings: e.g., "Hi, \r\n My name is Mohannad \t"
+	- Strings (as char arrays): e.g., "Hi, \r\n My name is Mohannad \t"
 	- Characters: e.g., 'a', '\n'
 	
 
 4.3 EXPRESSIONS
 	
-	These operators are only supported in expressions:
+	These are the only operators supported in expressions:
     +, -, post ++ and --,  *, /, %, <, <=, >, >=, ==, ||, &&
     
     Short circuits are not supported in boolean expressions.
@@ -159,7 +155,7 @@
 	below:
 	
 	- printStr(char str[]); printStr("string");
-		Prints a null-terminated string into the stdout.
+		Prints a null-terminated string into stdout.
 	- printChar(char c);
 	- printInt(int n);
 	- readStr(char buffer[], int bufferSize);
@@ -170,19 +166,18 @@
 	keywords and thus are part of the language syntax.
 
 	Yo can define your own functions. However, it is important to know that you
-	cannot write forward declarations for functions:
+	cannot write forward declarations for functions such as:
 
 	int f(int x);
 
-	So you should be careful about the order in which you define your functions.
-	You will run to awkward situations when you have too many functions that
-	call each other.
+	So you should be careful about the order in which you define your functions especially
+	when you have too many functions that call each other.
 
-	Additionally, scope is implemented properly (I hope). So visibility, scope, and
+	Additionally, scope is implemented properly (I think). So visibility, scope, and
 	life time of local variables are supposed to work the same way as a
-	real-word C compiler, unless there is something I did not get right. However, there
-	is no public scope (global variables), but the good news is, inside functions, you
-	can have nested scopes as many as you want. For example:
+	real C compiler, unless there is something I did not get right. However, there
+	is no public scope (global variables), but, inside functions, you
+	can have nested scopes with as many levels as you want. For example:
 
 	void foo()
 	{
@@ -199,7 +194,7 @@
 		}
 	}
 
-	There are many limitations in the language, for example there are no type
-	checking, and the semantic analysis is very limited and so on. So the goal was not creating
-	a language, but a small experiment in compiler writing.
+	There are many limitations in the language. For instance, there is no type
+	checking, and the semantic analysis is very limited (like matching arguments and paramaeters).
+	
 
