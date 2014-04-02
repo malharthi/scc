@@ -19,8 +19,8 @@ int read() {
 }
 
 void main() {
-	int x = read();
-	printInt(fib(x));
+  int x = read();
+  printInt(fib(x));
   if (x<10) 
     printInt(x);
   printChar('\n');
