@@ -1,3 +1,4 @@
+
 // Passing arrays between functions
 
 void str_arr2(char str[], int len) {
@@ -6,6 +7,7 @@ void str_arr2(char str[], int len) {
 		printChar(str[i]); printChar(' ');
 	}
 }
+
 // Takes a char array (string). E.g., Giving "Greg" and prints "G r e g"
 void str_arr(char str[], int len) {
 	int i;
@@ -14,6 +16,7 @@ void str_arr(char str[], int len) {
 	}
 	str_arr2(str, len);
 }
+
 // Increment every array element by one
 void inc_arr(int arr[], int len) {
 	int i;
@@ -21,6 +24,7 @@ void inc_arr(int arr[], int len) {
         arr[i] = arr[i]+1;
 	}
 }
+
 // Increments then rints array into terminal
 // To test passing arrays that are passed to the function
 void print_arr(int arr[], int len) {
@@ -31,6 +35,7 @@ void print_arr(int arr[], int len) {
         printInt(arr[i]); printChar(' ');
     }
 }
+
 void main() {
 	int i=5;
 	int array[5] = { 10, 20, 32, 42, 16 };

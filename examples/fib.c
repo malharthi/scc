@@ -1,3 +1,4 @@
+
 // fib algorithm
 int fib(int i) {
   if (i == 1) {
@@ -10,11 +11,13 @@ int fib(int i) {
     }
   }
 }
+
 int read() {
   int ret;
   readInt(ret);
   return ret;
 }
+
 void main() {
 	int x = read();
 	printInt(fib(x));

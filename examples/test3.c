@@ -3,6 +3,7 @@
 void hey(char a) {
 	printChar(a);
 }
+
 void main() {
 	int y = 100;
 	int x = y+5;

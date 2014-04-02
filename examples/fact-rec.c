@@ -7,6 +7,7 @@ int fact_recursive(int n) {
 	else
 		return n * fact_recursive(n-1);
 }
+
 int main() {
 	int n;
 

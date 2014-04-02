@@ -13,12 +13,14 @@ void bubble_sort(int array[], int len) {
 		}
 	}
 }
+
 void print_array(int array[], int len) {
 	int i;
 	for (i=0; i < len; i++) {
 		printInt(array[i]); printChar(' ');
 	}
 }
+
 void main() {	
 	int array[10] = { 34, 11, 9, 0, 5, 2, 4, 3, 1, 4 };
 	int len = 10, i, k, temp;
