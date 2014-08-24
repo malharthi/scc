@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Symbol Table Representation Header
+//
+
 #ifndef INCLUDE_CCOMPX_SRC_SYMBOL_TABLE_H__
 #define INCLUDE_CCOMPX_SRC_SYMBOL_TABLE_H__
 
@@ -22,19 +26,18 @@ using namespace __gnu_cxx;
 #include "ccomp.h"
 #include "str_helper.h"
 
+
+
 // Token codes, each token is identified by an integer.
+// Enumuration names are independent from their meanings.
 
-// Token names chosen in this enum are the names of the plain symbols
-// which have no relation with the meaning of the symbol in the context of the
-// programming lanauge. At the level of lexical analysis, symbols
-// are independent from their meaning, and the semantic analysis has yet to
-// figure out the meaning of the symbols. For instance, the symbol '*' is called
-// 'ASTERISK' or possibly a 'STAR'. It can refer to different language elements,
-// such as a pointer, or a muliplication sign, so in the enum we call just a an
-// asterisk or a star, until the parser or the semantic analyer figures out the
-// meaning from the context.
+// Token codes for single-character token equals the ASCII code of the
+// character, also equal to the corresponding opcode in the intermediate
+// language. This is to allow quick generation of the intermidate instruction
+// based on the token code.
 
-enum TokenCode {
+enum TokenCode
+{
   END_OF_FILE = EOF,
   PLUS = (int)'+',
   MINUS = (int)'-',
@@ -96,24 +99,35 @@ enum TokenCode {
   GOTO
 };
 
+
+
 // Represents the type of variables and return types
-enum DataType {
+enum DataType
+{
   INT_TYPE,
   CHAR_TYPE,
   VOID_TYPE
 };
 
+
+
 // Indicates if the variable is a local variable or a parameter
-enum VariableKind {
+enum VariableKind
+{
   LOCAL,
   ARGUMENT
 };
 
-enum TokenType {
+
+
+enum TokenType
+{
   COMMENT,
   SINGLE_CHAR_SYMBOL,
   TWO_CHAR_SYMBOL
 };
+
+
 
 // A hash function for hash_map<std::string, Token*>,
 // since the stl does not provide one for maps with std::string keys
@@ -124,19 +138,23 @@ namespace std
 #endif
 {
 template<>
-struct hash<std::string> {
+struct hash<std::string>
+{
   size_t operator()(const std::string& x) const {
     return hash< const char* >()(x.c_str());
   }
 };
 
 template<>
-struct hash<TokenCode> {
+struct hash<TokenCode>
+{
   size_t operator()(const TokenCode x) const {
     return hash<int>()(static_cast<int>(x));
   }
 };
 } // namesapce
+
+
 
 std::string GetTokenString(TokenCode token_code);
 
@@ -154,8 +172,11 @@ std::string GetTokenString(TokenCode token_code);
 //   bool is_const_;
 // };
 
+
+
 // Represents a token in the source.
-class Token {
+class Token
+{
  public:
   // Creates a new Token object given a code and lexeme.
   Token() { }
@@ -192,9 +213,12 @@ class Token {
   SourceLocation location_;
 };
 
+
+
 // Represents a symbol in the symbol table, which is the base class
 // for the rest of the symbol table classes.
-class Symbol {
+class Symbol
+{
  public:
   // Creates a new Symbol object given a lexeme and a token code.
   Symbol(const std::string& lexeme, TokenCode code)
@@ -221,8 +245,10 @@ private:
 };
 
 
+
 // Represnts a symbole that holds a variable info.
-class VariableSymbol : public Symbol {
+class VariableSymbol : public Symbol
+{
  public:
   // Creates a new VariableSymbol given the variable's identifier.
   VariableSymbol(const std::string& identifier)
@@ -278,10 +304,15 @@ class VariableSymbol : public Symbol {
   VariableKind kind_;
 };
 
+
+
 class Parameter;
 
+
+
 // Represents the symbol that hold a function info.
-class FunctionSymbol : public Symbol {
+class FunctionSymbol : public Symbol
+{
  public:
   // Create a new FunctionSymbol given the function name (Identifier)
   FunctionSymbol(const std::string& identifier,
@@ -304,8 +335,11 @@ public:
   
 };
 
+
+
 // Represents a parameter to a function
-class Parameter {
+class Parameter
+{
  public:
   // Creates a new Parameter object given a type, an identifier and if
   // it is an array or not.
@@ -335,10 +369,12 @@ class Parameter {
 };
 
 
+
 // Represnts our symbol table. This class is responsible for deallocating the
 // associated symbol objects. The root table also is responsible for 
 // deallocating its child symbol tables.
-class SymbolTable {
+class SymbolTable
+{
  public:
   // Creates a new symbol table object given the parent table (the
   // parent scope). If it is the root table then pass NULL. 
@@ -377,5 +413,7 @@ class SymbolTable {
 
    DISALLOW_COPY_AND_ASSIGN(SymbolTable);
 };
+
+
 
 #endif // INCLUDE_CCOMPX_SRC_SYMBOL_TABLE_H__

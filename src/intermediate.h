@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Intermediate Code Representation Header
+//
+
 #ifndef INCLUDE_CCOMPX_SRC_INTERMEDIATE_H__
 #define INCLUDE_CCOMPX_SRC_INTERMEDIATE_H__
 
@@ -14,11 +18,16 @@
 // #include "code_gen.h"
 #include "symbol_table.h"
 
+
+
 class CodeGenerator;
+
+
 
 // Intermediate opcodes. Number of operands and their order explained in the
 // comments in front of each opcode, or on top of each group of them.
-enum IntermediateOp {
+enum IntermediateOp
+{
   // Three-parameter instructions
   // res = operand1 op operand3
   ASSIGN_OP = (int)'=',
@@ -58,9 +67,12 @@ enum IntermediateOp {
   READ_STR_OP
 };
 
+
+
 // This interface must be implemented by all classes that represents the 
 // intermediate code structure.
-class Operand {
+class Operand
+{
  public:
   // Return the textual representation of the operand in the assembler language
   virtual std::string GetAsmOperand(CodeGenerator& code_gen) = 0;
@@ -69,8 +81,11 @@ class Operand {
   virtual std::string GetIntermediateOperand() = 0;
 };
 
+
+
 template<typename T>
-class BasicOperand : public Operand {
+class BasicOperand : public Operand
+{
  public:
   BasicOperand(const T& data)
     : data_(data) {
@@ -97,6 +112,8 @@ class BasicOperand : public Operand {
   T data_;
 };
 
+
+
 // Represents a label operand in the intermediate language
 typedef BasicOperand<std::string> LabelOperand;
 // Represents a label operand in the intermediate language (number literal)
@@ -104,8 +121,11 @@ typedef BasicOperand<int> NumberOperand;
 // Represents a function operand in the intermediate language
 typedef BasicOperand<std::string> FunctionOperand;
 
+
+
 // Represents a variable operand in the intermediate language
-class VariableOperand : public BasicOperand<std::string> {
+class VariableOperand : public BasicOperand<std::string>
+{
  public:
   VariableOperand(const std::string& identifier, SymbolTable* symbol_table)
    : BasicOperand<std::string>(identifier),
@@ -124,8 +144,11 @@ class VariableOperand : public BasicOperand<std::string> {
   SymbolTable* symbol_table_;
 };
 
+
+
 // Represents an array operand in the intermediate language
-class ArrayOperand : public VariableOperand {
+class ArrayOperand : public VariableOperand
+{
  public:
   ArrayOperand(const std::string& identifier, Operand* index,
                SymbolTable* symbol_table)
@@ -141,8 +164,11 @@ private:
   Operand* index_operand_;
 };
 
+
+
 // Represents a single instruction in the intermediate language
-class IntermediateInstr {
+class IntermediateInstr
+{
  public:
   IntermediateInstr(IntermediateOp op, Operand* operand1 = NULL,
                     Operand* operand2 = NULL, Operand* operand3 = NULL)

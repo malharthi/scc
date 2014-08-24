@@ -4,16 +4,22 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Intermediate Code Representation
+//
+
 #include <sstream>
 
 #include "str_helper.h"
 #include "intermediate.h"
-
 #include "code_gen.h";
+
+
 
 // VariableOperand class implementation
 
-std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
+std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen)
+{
   std::stringstream operand_stream;
   const VariableSymbol* variable_symbol = GetSymbol();
   // Regular local variable (Just return the value)
@@ -31,16 +37,22 @@ std::string VariableOperand::GetAsmOperand(CodeGenerator& code_gen) {
     } else {
       operand_stream << (variable_symbol->data_type() == INT_TYPE? "dword " : "byte ");
     }
+    
     operand_stream << "[ebp + " << (variable_symbol->offset() + 8) << "]";
   }
+
   return operand_stream.str();
 }
 
+
+
 // ArrayOperand class implementation
 
-std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
+std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen)
+{
   std::stringstream operand_stream;
   const VariableSymbol* array_symbol = GetSymbol();
+  
   if (array_symbol->kind() == LOCAL) {
     // Regular static array created locally (Access the value of the element)
     code_gen.LoadOperandToReg("esi", index_operand_);
@@ -68,14 +80,21 @@ std::string ArrayOperand::GetAsmOperand(CodeGenerator& code_gen) {
   return operand_stream.str();
 }
 
-std::string ArrayOperand::GetIntermediateOperand() {
-  return str_helper::FormatString("%s[%s]", data().c_str(),
-    index_operand_->GetIntermediateOperand().c_str());
+
+
+std::string ArrayOperand::GetIntermediateOperand()
+{
+  return str_helper::FormatString("%s[%s]",
+                                  data().c_str(),
+                                  index_operand_->GetIntermediateOperand().c_str());
 }
+
+
 
 // IntermediateInstr class implementation
 
-std::string IntermediateInstr::GetAsString() { 
+std::string IntermediateInstr::GetAsString()
+{ 
   switch (operation_) {
   case LABEL_OP:
     return str_helper::FormatString("%s:\n", operand1_->GetIntermediateOperand().c_str());
@@ -174,6 +193,7 @@ std::string IntermediateInstr::GetAsString() {
       operation_str = static_cast<char>(operation_);
       break;
     }
+
     // Arithmatic or logical operations
     if ((operation_ == SUBTRACT_OP || operation_ == NOT_OP) && operand3_ == NULL)
       // Unary operation

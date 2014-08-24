@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Assembler Code Generator Header
+//
+
 #ifndef INCLUDE_CCOMPX_SRC_CODE_GEN_H__
 #define INCLUDE_CCOMPX_SRC_CODE_GEN_H__
 
@@ -14,7 +18,10 @@
 #include "intermediate.h"
 #include "str_helper.h"
 
-class CodeGenerator {
+
+
+class CodeGenerator
+{
  public:
   CodeGenerator(std::ostream& output,
                 IntermediateInstrsList* interm_code)

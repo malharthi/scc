@@ -1,5 +1,5 @@
 
-/* bubble sort using a function*/
+/* bubble sort using a function */
 
 void bubble_sort(int array[], int len) {
   int i, k, temp;

@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Assembler Code Generator
+//
+
 #include <sstream>
 
 #include "code_gen.h"
@@ -18,11 +22,14 @@
   const char* gets_str   = "gets";
 #endif
 
-// Emiting an intermediate instruction as a comment before the its translation
+
+
+// Emitting an intermediate instruction as a comment before its translation
 // to assembler code.
-void CodeGenerator::EmitComment(std::string comment) {
+void CodeGenerator::EmitComment(std::string comment)
+{
   //assembler_code.push_back(str_helper::FormatString("\t%s", comment.c_str()));
-  // Remove the tab character at the begining of the intermediate instruction
+  // Remove the tab character at the beginning of the intermediate instruction
   comment.erase(0, 1);
   // Remove the new line character at the end of the intermediate instruction
   comment.erase(comment.length() - 1, 1);
@@ -32,52 +39,74 @@ void CodeGenerator::EmitComment(std::string comment) {
   assembler_code_.push_back(s.str());
 }
 
-void CodeGenerator::EmitLabel(const std::string& label) {
+
+
+void CodeGenerator::EmitLabel(const std::string& label)
+{
   std::stringstream s;
   s << label << ":\n";
   assembler_code_.push_back(s.str());
 }
 
-void CodeGenerator::EmitDirective(const std::string& directive) {
+
+
+void CodeGenerator::EmitDirective(const std::string& directive)
+{
   assembler_code_.push_back(str_helper::FormatString("%s\n", directive.c_str()));
 }
 
-void CodeGenerator::EmitInstruction(const std::string& mnem) {
+
+
+void CodeGenerator::EmitInstruction(const std::string& mnem)
+{
   assembler_code_.push_back(str_helper::FormatString("\t%s\n", mnem.c_str()));
 }
 
+
+
 void CodeGenerator::EmitInstruction(const std::string& mnem,
-                                    const std::string& p) {
+                                    const std::string& p)
+{
   std::string instruction;
   instruction = str_helper::FormatString("\t%s \t%s\n", mnem.c_str(), p.c_str());
   assembler_code_.push_back(instruction);
 }
 
+
+
 void CodeGenerator::EmitInstruction(const std::string& mnem,
                                     const std::string& p1,
-                                    const std::string& p2) {
+                                    const std::string& p2)
+{
   std::string instruction;
   instruction = str_helper::FormatString("\t%s \t%s, %s\n", mnem.c_str(),
                                          p1.c_str(), p2.c_str());
   assembler_code_.push_back(instruction);
 }
 
+
+
 void CodeGenerator::EmitInstruction(const std::string& mnem,
                                     const std::string& p1,
                                     const std::string& p2,
-                                    const std::string& p3) {
+                                    const std::string& p3)
+{
   std::string instruction;
   instruction = str_helper::FormatString("\t%s \t%s, %s, %s\n", mnem.c_str(),
                                          p1.c_str(), p2.c_str(), p3.c_str());
   assembler_code_.push_back(instruction);
 }
 
+
+
 // Generates a code that loads the content of a memory location
 // into a register
 void CodeGenerator::LoadOperandToReg(const std::string& reg,
-                                     Operand* operand) {
+                                     Operand* operand)
+{
   std::string move_instr = "mov";
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
+  
   if (var_op != NULL) {
     const VariableSymbol* symbol = var_op->GetSymbol();
     // ArrayOperand* array_op = dynamic_cast< ArrayOperand*>(var_op);
@@ -90,13 +119,17 @@ void CodeGenerator::LoadOperandToReg(const std::string& reg,
       move_instr = "movsx";
     }
   }
+
   EmitInstruction(move_instr, reg, operand->GetAsmOperand(*this));
 }
 
-// Generates a code that transfters the content of a register into
+
+
+// Generates a code that transfers the content of a register into
 // a memory location (Do not use any index registers here)
 void CodeGenerator::StoreRegToAddress(Operand* operand,
-                                      const std::string& reg) {
+                                      const std::string& reg)
+{
   std::string src_register = reg;
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   if (var_op != NULL) {
@@ -105,33 +138,45 @@ void CodeGenerator::StoreRegToAddress(Operand* operand,
       src_register.append("l");
     }
   }
+
   EmitInstruction("mov", operand->GetAsmOperand(*this), src_register);
 }
 
+
+
 // Remove nasm size specifiers from operands
 std::string CodeGenerator::RemoveSizeSpecifier(const VariableSymbol* symbol,
-                                               const std::string& operand_str) {
+                                               const std::string& operand_str)
+{
   std::string clean_operand = operand_str;
   // std::string nasm_keyword;
   // nasm_keyword = symbol->data_type() == INT_TYPE? "dword " : "byte ";
   //str_helper::FindAndReplaceAll(clean_operand, nasm_keyword.c_str(), "");
   str_helper::FindAndReplaceAll(clean_operand, "dword ", "");
   str_helper::FindAndReplaceAll(clean_operand, "byte ", "");
+
   return clean_operand;
 }
 
+
+
 // This function does a dirty trick, which is removing the 'dword' or 'byte'
 // keywords from the assembler operands returned from GetAsmOperand.
-void CodeGenerator::LoadEffectiveAddress(const std::string& reg, Operand* operand) {
+void CodeGenerator::LoadEffectiveAddress(const std::string& reg, Operand* operand)
+{
   VariableOperand* var_op = dynamic_cast<VariableOperand*>(operand);
   std::string asm_operand = CodeGenerator::RemoveSizeSpecifier(var_op->GetSymbol(),
                                                 var_op->GetAsmOperand(*this));
   EmitInstruction("lea", reg, asm_operand);
 }
 
-void CodeGenerator::GenerateCode() {
-  // Generate data and code segments and initilize data
-  //
+
+
+// Iterates over intermediate code instructions and generates equivalent x86
+// assembler code
+void CodeGenerator::GenerateCode()
+{
+  // Generate data and code segments and initialize data
 #if defined __APPLE__
   EmitDirective("extern _printf, _scanf, _gets");
 #else
@@ -149,8 +194,9 @@ void CodeGenerator::GenerateCode() {
 #endif
 
   IntermediateInstrsList::iterator it;
+  
   for (it = intermediate_code->begin(); it != intermediate_code->end(); it++) {
-    IntermediateInstr* interm_instr =  (*it);
+    IntermediateInstr* interm_instr =  (*it);  
     // Emit a commented intermediate instruction before
     // each set of assembler code, exclude labels
     if (interm_instr->operation() != LABEL_OP) {
@@ -175,13 +221,12 @@ void CodeGenerator::GenerateCode() {
 
     case SUBTRACT_OP:
       if (interm_instr->operand3() == NULL) {
-        // Negating operation
-        // x = -y
+        // Negate instruction (x = - y)
         LoadOperandToReg("eax", interm_instr->operand2());
         EmitInstruction("neg", "eax");
         StoreRegToAddress(interm_instr->operand1(), "eax");
       } else {
-        // x = y - z
+        // Subtract instruction (x = y - z)
         LoadOperandToReg("eax", interm_instr->operand2());
         EmitInstruction("sub", "eax", interm_instr->operand3()->GetAsmOperand(*this));
         StoreRegToAddress(interm_instr->operand1(), "eax");
@@ -193,6 +238,7 @@ void CodeGenerator::GenerateCode() {
     case OR_OP:
       {
         std::string instruction_mnem;
+        
         switch (interm_instr->operation()) {
         case ADD_OP:
           instruction_mnem =  "add";
@@ -206,6 +252,7 @@ void CodeGenerator::GenerateCode() {
           instruction_mnem = "or";
           break; 
         }
+
         LoadOperandToReg("eax", interm_instr->operand2());
         EmitInstruction(instruction_mnem, "eax",
                         interm_instr->operand3()->GetAsmOperand(*this));
@@ -218,14 +265,14 @@ void CodeGenerator::GenerateCode() {
         std::string operand3;
         LoadOperandToReg("eax", interm_instr->operand2());
 
-        // If operand 3 is a number operand (Immidiate operand)
+        // If operand 3 is a number operand (Immediate operand)
         if (dynamic_cast<NumberOperand*>(interm_instr->operand3()) != NULL) {
           operand3 = "ecx";
-          EmitInstruction("mov", "ecx",
-                          interm_instr->operand3()->GetAsmOperand(*this));
+          EmitInstruction("mov", "ecx", interm_instr->operand3()->GetAsmOperand(*this));
         } else {
           operand3 = interm_instr->operand3()->GetAsmOperand(*this);
         }
+
         EmitInstruction("imul", operand3);
         StoreRegToAddress(interm_instr->operand1(), "eax");
       }
@@ -234,6 +281,7 @@ void CodeGenerator::GenerateCode() {
     case DIVIDE_OP:
     case DIV_REMINDER_OP:
       LoadOperandToReg("eax", interm_instr->operand2());
+
       // Extend eax sign to edx
       EmitInstruction("cdq");
 
@@ -380,8 +428,10 @@ void CodeGenerator::GenerateCode() {
     case PARAM_OP:
       {
         VariableOperand* var_op = dynamic_cast<VariableOperand*>(interm_instr->operand1());
+        
         if ((var_op != NULL) /*&& (var_op->GetSymbol()->data_type() == CHAR_TYPE)*/) {
           const VariableSymbol* symbol = var_op->GetSymbol();
+          
           if (symbol->is_array() && symbol->kind() == LOCAL) {
             // An array that is created locally (A chunk in the local stack not a pointer)
             LoadEffectiveAddress("eax", var_op);
@@ -408,6 +458,7 @@ void CodeGenerator::GenerateCode() {
       if (interm_instr->operand1() != NULL) {
         LoadOperandToReg("eax", interm_instr->operand1());
       }
+
       //EmitInstruction("leave");
       EmitInstruction("mov", "esp", "ebp");
       //EmitInstruction("add", "esp", interm_instr->operand1()->GetAsmOperand(*this));
@@ -417,14 +468,19 @@ void CodeGenerator::GenerateCode() {
       break;
     }
   }
+
   WriteAssmblerCodeToStream();
 }
 
-void CodeGenerator::WriteAssmblerCodeToStream() {
+
+
+void CodeGenerator::WriteAssmblerCodeToStream()
+{
   std::vector<std::string>::iterator it;
+
   for (it = assembler_code_.begin(); it != assembler_code_.end(); it++) {
     output_stream_ << (*it);
   }
+
   output_stream_.flush();
 }
-

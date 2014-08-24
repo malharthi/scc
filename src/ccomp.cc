@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Main Compiler Interface (Driver)
+//
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -14,27 +18,38 @@
 #include "code_gen.h"
 #include "str_helper.h"
 
-void PrintToken(Token tok) {
+
+
+void PrintToken(Token tok)
+{
   std::cout << tok.lexeme() /*<< " | " << tok.code()*/ << std::endl;
 }
 
-void Lex(const std::string file, std::vector<Message>& errors_list) {
+
+
+void Lex(const std::string file, std::vector<Message>& errors_list)
+{
   Lexer lexer(file, &errors_list);
   SymbolTable symbol_table;
   Token token = lexer.GetNextToken(symbol_table);
-
+  
   do {
    std::cout << token.lexeme() /*<< " | " << token.code()*/ << std::endl;
    token = lexer.GetNextToken(symbol_table);
   } while (token.code() != END_OF_FILE);
 }
 
-int Compile(const std::string& file, std::vector<Message>& errors_list) {
+
+// Compilation driver. Returns 0 when successfull, another value otherwise.
+int Compile(const std::string& file, std::vector<Message>& errors_list)
+{
   // The executable output file name (no extension for *nix systems)
   std::string output_file_name_no_ext = str_helper::RemoveExtensionFromFileName(file);
+
   // The intermediate code output file name (.intermediate)
   std::string output_file_name_interm =
     str_helper::FormatString("%s.intermediate", output_file_name_no_ext.c_str());
+
   // The assembler code output file name (.s)
   std::string output_file_name_assembler =
     str_helper::FormatString("%s.s", output_file_name_no_ext.c_str());
@@ -47,7 +62,7 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
   int ret_code;
 
   if (errors_list.size() == 0) {
-    // Output intermediate code into a file
+    // Write intermediate code into a file
     std::ofstream output_file_interm(output_file_name_interm.c_str());
     IntermediateInstrsList::iterator it;
     for (it = interm_code.begin(); it != interm_code.end(); it++) {
@@ -56,7 +71,7 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
     }
     output_file_interm.close();
 
-    // Output assembler code into a file
+    // Write assembler code into a file
     std::ofstream output_file_assembler(output_file_name_assembler.c_str());
     CodeGenerator code_gen(output_file_assembler, &interm_code);
 
@@ -92,7 +107,12 @@ int Compile(const std::string& file, std::vector<Message>& errors_list) {
   return ret_code;
 }
 
-int main(int argc, char* argv[]) {
+
+// Usage:
+//   scc <filename> [lex]
+//
+int main(int argc, char* argv[])
+{
   std::cout << "Simple C Compiler (SCC)" << std::endl;
   if (argc < 2) {
     std::cout << "No sufficient input" << std::endl;
@@ -101,7 +121,7 @@ int main(int argc, char* argv[]) {
 
   int ret_code = 0;
 
-  std::string args[argc];
+  std::string* args = new std::string[argc];
   for (int i = 0; i < argc; i++)
     args[i] = argv[i];
 

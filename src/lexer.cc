@@ -4,25 +4,38 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Lecical Analyzer
+//
+
 #include <cctype>
 #include <cstdio>
 #include <sstream>
 
 #include "lexer.h"
 
+
+
 Lexer::Lexer(const std::string& file_name, std::vector<Message>* errors)
   : lexical_errors_(errors),
-    current_location_(SourceLocation(file_name, 1)) {
+    current_location_(SourceLocation(file_name, 1))
+{
       
   input_stream_.open(file_name.c_str());
   //ReadChar();
 }
 
-Lexer::~Lexer() {
+
+
+Lexer::~Lexer()
+{
   input_stream_.close();
 }
 
-void Lexer::Error(const std::string& message) {
+
+
+void Lexer::Error(const std::string& message)
+{
   std::stringstream message_stream;
   message_stream << "{ "
                  << current_location_.line()
@@ -31,7 +44,10 @@ void Lexer::Error(const std::string& message) {
   lexical_errors_->push_back(message_stream.str());
 }
 
-void Lexer::ReadChar() {
+
+
+void Lexer::ReadChar()
+{
   if (!input_stream_.get(current_character_))
     current_character_ = EOF;
 
@@ -39,11 +55,17 @@ void Lexer::ReadChar() {
     current_location_.set_line(current_location_.line() + 1);
 }
 
-char Lexer::PeekChar() {
+
+
+char Lexer::PeekChar()
+{
   return input_stream_.peek();
 }
 
-void Lexer::StepBack(int steps) {
+
+
+void Lexer::StepBack(int steps)
+{
   std::ifstream::pos_type pos;
 
   if (steps < 1)
@@ -58,7 +80,10 @@ void Lexer::StepBack(int steps) {
   input_stream_.seekg(pos);
 }
 
-Token Lexer::PeekToken(SymbolTable& symbol_table) {
+
+
+Token Lexer::PeekToken(SymbolTable& symbol_table)
+{
   std::ifstream::pos_type pos = input_stream_.tellg();
   //pos-=1;
   Token token = ScanToken(symbol_table);
@@ -67,13 +92,19 @@ Token Lexer::PeekToken(SymbolTable& symbol_table) {
   return token;
 }
 
-Token Lexer::GetNextToken(SymbolTable& symbol_table) {
+
+
+Token Lexer::GetNextToken(SymbolTable& symbol_table)
+{
   std::ifstream::pos_type pos = input_stream_.tellg();
   source_pointers_.push(pos);
   return ScanToken(symbol_table);
 }
 
-Token Lexer::ScanToken(SymbolTable& symbol_table) {
+
+
+Token Lexer::ScanToken(SymbolTable& symbol_table)
+{
   //bool is_comment;
   std::string lex_buffer;
 
@@ -110,7 +141,7 @@ start:
   }
 
   // Analyzing a number literal
-  //next_char = peekChar();
+  // next_char = peekChar();
   if (isdigit(next_char)) {
     ReadChar();
     lex_buffer += current_character_;
@@ -180,7 +211,7 @@ start:
   const TokenType token_type = GetTokenType(lex_buffer);
   switch (token_type) {
   case COMMENT:
-    //is_comment = true;
+    //i s_comment = true;
     // if it's a one line comment, skip until the end of line
     ReadChar(); // pass the second char
     if (lex_buffer == "//") {
@@ -229,6 +260,8 @@ start:
   return Token(static_cast<TokenCode>(EOF), "", current_location_);
 }
 
+
+
 TokenType Lexer::GetTokenType(const std::string& lexeme) {
   const int length = 11;
   struct {
@@ -243,9 +276,9 @@ TokenType Lexer::GetTokenType(const std::string& lexeme) {
     { std::string("&&") , AND },
     { std::string("++") , PLUS_PLUS },
     { std::string("--") , MINUS_MINUS },
-    { std::string("//") , COMMENT  },
-    { std::string("/*") , COMMENT  },
-    { std::string( "" ) , 0   }
+    { std::string("//") , COMMENT },
+    { std::string("/*") , COMMENT },
+    { std::string( "" ) , 0 }
   };
 
   for (int i = 0; i < length; i++) {

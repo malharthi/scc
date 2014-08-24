@@ -4,9 +4,16 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Symbol Table Representation
+//
+
 #include "symbol_table.h"
 
-std::string GetTokenString(TokenCode token_code) {
+
+
+std::string GetTokenString(TokenCode token_code)
+{
   static struct TokenNames {
     hash_map<TokenCode, const char*> token_names;
     TokenNames() {
@@ -72,11 +79,17 @@ std::string GetTokenString(TokenCode token_code) {
   return token_names.token_names.find(token_code)->second;
 }
 
-bool SymbolTable::IsInCurrentScope(const std::string& lexeme) const {
+
+
+bool SymbolTable::IsInCurrentScope(const std::string& lexeme) const
+{
   return table_.find(lexeme) != table_.end();
 }
 
-SymbolTable::~SymbolTable() {
+
+
+SymbolTable::~SymbolTable()
+{
   std::vector<SymbolTable*>::iterator vector_it;
 
   // Deleting child scopes (tables)
@@ -90,7 +103,10 @@ SymbolTable::~SymbolTable() {
     delete it->second;
 }
 
-bool SymbolTable::Insert(const std::string& lexeme, TokenCode code) {
+
+
+bool SymbolTable::Insert(const std::string& lexeme, TokenCode code)
+{
   bool is_inserted;
   Symbol* symbol = new Symbol(lexeme, code);
   
@@ -100,7 +116,10 @@ bool SymbolTable::Insert(const std::string& lexeme, TokenCode code) {
   return is_inserted;
 }
 
-bool SymbolTable::Insert(Symbol* symbol) {
+
+
+bool SymbolTable::Insert(Symbol* symbol)
+{
   std::string lexeme = symbol->lexeme();
   HashIterator it = table_.find(lexeme);
 
@@ -111,7 +130,10 @@ bool SymbolTable::Insert(Symbol* symbol) {
   return true;
 }
 
-Symbol* SymbolTable::operator [](const std::string& key) {
+
+
+Symbol* SymbolTable::operator [](const std::string& key)
+{
   SymbolTable* current_scope = this;
   do {
     HashIterator it = current_scope->table_.find(key);

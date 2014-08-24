@@ -4,11 +4,18 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Main Compiler Interface Header (Driver)
+//
+
 #ifndef INCLUDE_CCOMPX_SRC_CCOMP_H__
 #define INCLUDE_CCOMPX_SRC_CCOMP_H__
 
+
+
 // A location in a source file
-class SourceLocation {
+class SourceLocation
+{
  public:
   SourceLocation(const std::string& file="", unsigned int line = 1, unsigned int column = 1)
     : file_(file), line_(line), column_(column) {
@@ -36,8 +43,11 @@ private:
   unsigned int column_;
 };
 
+
+
 // A compiler message associated with a location
-class Message {
+class Message
+{
  public:
   Message(const std::string& message)
     : message_(message) {

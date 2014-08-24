@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// String Helper Functions
+//
+
 #include <cstdarg>
 #include <cstring>
 #include <cstdio>
@@ -13,9 +17,12 @@
 namespace str_helper
 {
 
+
+
 void FindAndReplaceAll(std::string& source,
                        const char* old_value,
-                       const char* new_value) {
+                       const char* new_value)
+{
   size_t old_len = strlen(old_value);
   size_t new_len = strlen(new_value);
   size_t position = 0;
@@ -26,7 +33,10 @@ void FindAndReplaceAll(std::string& source,
   }
 }
 
-std::string FormatString(std::string format_str, ...) {
+
+
+std::string FormatString(std::string format_str, ...)
+{
   va_list arg_list;
   va_start(arg_list, format_str);
 
@@ -38,7 +48,10 @@ std::string FormatString(std::string format_str, ...) {
   return std::string(buffer);
 }
 
-std::string RemoveExtensionFromFileName(const std::string& file_name) {
+
+
+std::string RemoveExtensionFromFileName(const std::string& file_name)
+{
   size_t last_index = file_name.find_last_of(".");
   if (last_index == std::string::npos)
     // No extension is present
@@ -46,5 +59,7 @@ std::string RemoveExtensionFromFileName(const std::string& file_name) {
   else
     return file_name.substr(0, last_index); 
 }
+
+
 
 } // namespace

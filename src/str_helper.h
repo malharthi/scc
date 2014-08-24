@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// String Helper Functions Header
+//
+
 #ifndef INLCUDE_CCOMPX_SRC_STR_HELPER_H__
 #define INLCUDE_CCOMPX_SRC_STR_HELPER_H__
 

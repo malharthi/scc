@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Lecical Analyzer Header
+//
+
 #ifndef INCLUDE_CCOMPX_SRC_LEXER_H__
 #define INCLUDE_CCOMPX_SRC_LEXER_H__
 
@@ -16,8 +20,11 @@
 #include "symbol_table.h"
 #include "str_helper.h"
 
+
+
 // Our lexical analyzer that do the actual analysis
-class Lexer {
+class Lexer
+{
  public:
   // Creates a new lexical analyzer object associated with the given
   // source file.

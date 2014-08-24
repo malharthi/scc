@@ -4,6 +4,10 @@
 // This source code is licensed under the BSD license, which can be found in
 // the LICENSE.txt file.
 
+//
+// Parser Header
+//
+
 #ifndef INCLUDE_CCOMPX_SRC_PARSER_H__
 #define INCLUDE_CCOMPX_SRC_PARSER_H__
 
@@ -17,31 +21,34 @@
 #include "symbol_table.h"
 #include "intermediate.h"
 
-#define RESERVE(lexeme, code) \
-  root_symbol_table_->Insert(lexeme, code);
+// #define RESERVE(lexeme, code) \
+//   root_symbol_table_->Insert(lexeme, code);
+// 
+// #define RESERVE_KEYWORDS           \
+//   RESERVE("int", INT)              \
+//   RESERVE("char", CHAR)            \
+//   RESERVE("void", VOID)            \
+//   RESERVE("if", IF)                \
+//   RESERVE("else", ELSE)            \
+//   RESERVE("for", FOR)              \
+//   RESERVE("do", DO)                \
+//   RESERVE("while", WHILE)          \
+//   RESERVE("switch", SWITCH)        \
+//   RESERVE("case", CASE)            \
+//   RESERVE("default", DEFAULT)      \
+//   RESERVE("return", RETURN)        \
+//   RESERVE("break", BREAK)          \
+//   RESERVE("continue", CONTINUE)    \
+//   RESERVE("printInt", PRINT_INT)   \
+//   RESERVE("printStr", PRINT_STR)   \
+//   RESERVE("printChar", PRINT_CHAR) \
+//   RESERVE("readStr", READ_STR)     \
+//   RESERVE("readInt", READ_INT)
 
-#define RESERVE_KEYWORDS           \
-  RESERVE("int", INT)              \
-  RESERVE("char", CHAR)            \
-  RESERVE("void", VOID)            \
-  RESERVE("if", IF)                \
-  RESERVE("else", ELSE)            \
-  RESERVE("for", FOR)              \
-  RESERVE("do", DO)                \
-  RESERVE("while", WHILE)          \
-  RESERVE("switch", SWITCH)        \
-  RESERVE("case", CASE)            \
-  RESERVE("default", DEFAULT)      \
-  RESERVE("return", RETURN)        \
-  RESERVE("break", BREAK)          \
-  RESERVE("continue", CONTINUE)    \
-  RESERVE("printInt", PRINT_INT)   \
-  RESERVE("printStr", PRINT_STR)   \
-  RESERVE("printChar", PRINT_CHAR) \
-  RESERVE("readStr", READ_STR)     \
-  RESERVE("readInt", READ_INT)
 
-class Parser {
+
+class Parser
+{
  public:
   Parser(Lexer* lexer, IntermediateInstrsList* interm_list, std::vector<Message>* errors_list);
   ~Parser();
@@ -49,18 +56,18 @@ class Parser {
   void Parse();
 
  private:
-  void Error(const std::string& message_str);
-  void Error(TokenCode tok);
+  void ReportError(const std::string& message_str);
+  void ReportError(TokenCode tok);
 
   // Get the next token from the lexer
-  void NextToken();
+  void AdvanceToNextToken();
 
   // Skip until a specified token is found
   void SkipToToken(TokenCode code);
 
   // Match if the given token is found, no error message is generated.
   bool MatchIf(TokenCode code);
-  // Matchs the token and get the next, or generate an error message.
+  // Match the token and get the next, or generate an error message.
   void Match(TokenCode code);
   // Try to match an array of expected tokens, if non is founed generate an error
   void Match(TokenCode codes[], int n, const std::string& msg);
@@ -73,14 +80,16 @@ class Parser {
 
   unsigned int GetStackSize();
 
-  LabelOperand* NewLabel();
-  VariableOperand* NewTemp(DataType type = INT_TYPE,
-                           bool is_array = false,
-                           unsigned int elems = 1);
+  LabelOperand* CreateLabel();
+  VariableOperand* CreateTempVariable(DataType type = INT_TYPE,
+                           			 			bool is_array = false,
+                           			 		 	unsigned int elems = 1);
 
   void DeclareVariable(DataType type, std::string var_id, bool is_array, unsigned int elems);
   void CopyStringToBuffer(const std::string& array_id, const std::string& text);
   
+	void ReserveKeywords();
+	
   // Parsing functions
 
   void ParseFunctions();
@@ -90,17 +99,30 @@ class Parser {
   void ParseStatements();
   void ParseStatement();
   void ParseAssignment(Operand* lhs_operand = NULL);
-
-  Operand* ParseBool();
-  Operand* ParseAnd();
-  Operand* ParseEquality();
-  Operand* ParseRel();
-  Operand* ParseExpr();
-  Operand* ParseTerm();
-  Operand* ParseFactor();
-  Operand* ParseId(bool allow_func);
+	void ParseIfStatement();
+	void ParseForStatement();
+	void ParseWhileStatement();
+	void ParseDoStatement();
+	void ParseSwitchStatement();
+	void ParseBreakStatement();
+	void ParseContinueStatement();
+	void ParseReturnStatement();
+	
+	void ParseReadStrStatement();
+	void ParseReadIntStatement();
+	void ParsePrintCharIntStatement();
+	void ParsePrintStrStatement();
+	
+  Operand* ParseBooleanExpr();
+  Operand* ParseAndExpr();
+  Operand* ParseEqualityExpr();
+  Operand* ParseRelationalExpr();
+  Operand* ParseExpression();
+  Operand* ParseTermExpr();
+  Operand* ParseFactorExpr();
+  Operand* ParseIdentifier(bool allow_func);
   Operand* ParseFunctionCall(const std::string& func_id);
-  std::vector<Operand*>* ParseArgumentsList();
+  std::vector<Operand*>* ParseArgumentList();
 
  private:
   // Private members
@@ -124,5 +146,7 @@ class Parser {
 
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };
+
+
 
 #endif // INCLUDE_CCOMPX_SRC_PARSER_H__
